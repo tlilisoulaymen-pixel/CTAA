@@ -1,0 +1,6767 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>CTA-Sim PRO ● Simulation Avancée des Centrales de Traitement d'Air</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+
+  <link
+
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap"
+
+    rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <style>
+
+    :root {
+
+      --bg0: #0d1117;
+
+      --bg1: #161b22;
+
+      --bg2: #1c2128;
+
+      --bg3: #21262d;
+
+      --heat: #e63946;
+
+      --heat-d: rgba(230, 57, 70, 0.12);
+
+      --cool: #0077b6;
+
+      --cool-d: rgba(0, 119, 182, 0.12);
+
+      --eco: #2a9d8f;
+
+      --eco-d: rgba(42, 157, 143, 0.12);
+
+      --hum: #e9c46a;
+
+      --hum-d: rgba(233, 196, 106, 0.12);
+
+      --outdoor: #f4a261;
+
+      --outdoor-d: rgba(244, 162, 97, 0.12);
+
+      --neutral: #6c757d;
+
+      --alert: #d62828;
+
+      --alert-d: rgba(214, 40, 40, 0.12);
+
+      --supply: #48cae4;
+
+      --supply-d: rgba(72, 202, 228, 0.12);
+
+      --t1: #e6edf3;
+
+      --t2: #8b949e;
+
+      --t3: #484f58;
+
+      --brd: rgba(139, 148, 158, 0.1);
+
+      --brdh: rgba(139, 148, 158, 0.25);
+
+      --fh: 'Syne', sans-serif;
+
+      --fb: 'DM Sans', sans-serif;
+
+      --fm: 'JetBrains Mono', monospace;
+
+      --r: 10px;
+
+      --rl: 14px;
+
+      --sw: 224px;
+
+    }
+
+    *,
+
+    *::before,
+
+    *::after {
+
+      box-sizing: border-box;
+
+      margin: 0;
+
+      padding: 0
+
+    }
+
+    html,
+
+    body {
+
+      height: 100%;
+
+      background: var(--bg0);
+
+      color: var(--t1);
+
+      font-family: var(--fb);
+
+      font-size: 14px;
+
+      overflow: hidden
+
+    }
+
+    .app {
+
+      display: flex;
+
+      height: 100vh;
+
+      overflow: hidden
+
+    }
+
+    /* ”—€ Sidebar (hidden) ”—€ */
+
+    .sb {
+
+      display: none
+
+    }
+
+    .sb-logo {
+
+      padding: 18px 16px 14px;
+
+      border-bottom: 1px solid var(--brd)
+
+    }
+
+    .sb-brand {
+
+      font-family: var(--fh);
+
+      font-size: 13px;
+
+      font-weight: 800;
+
+      color: var(--cool);
+
+      letter-spacing: .04em;
+
+      line-height: 1.2
+
+    }
+
+    .sb-brand span {
+
+      color: var(--t2);
+
+      font-weight: 400;
+
+      font-size: 9.5px;
+
+      display: block;
+
+      margin-top: 3px;
+
+      font-family: var(--fb);
+
+      line-height: 1.4
+
+    }
+
+    .sb-nav {
+
+      flex: 1;
+
+      padding: 8px 0;
+
+      overflow-y: auto
+
+    }
+
+    .nav-sec {
+
+      padding: 10px 16px 3px;
+
+      font-size: 9px;
+
+      font-weight: 700;
+
+      color: var(--t3);
+
+      text-transform: uppercase;
+
+      letter-spacing: .1em
+
+    }
+
+    .ni {
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 9px;
+
+      padding: 8px 16px;
+
+      color: var(--t2);
+
+      cursor: pointer;
+
+      transition: all .15s;
+
+      font-size: 12.5px;
+
+      font-weight: 500;
+
+      border-left: 2px solid transparent;
+
+      user-select: none
+
+    }
+
+    .ni svg {
+
+      width: 15px;
+
+      height: 15px;
+
+      flex-shrink: 0;
+
+      opacity: .7
+
+    }
+
+    .ni:hover {
+
+      color: var(--t1);
+
+      background: rgba(139, 148, 158, .05)
+
+    }
+
+    .ni.active {
+
+      color: var(--cool);
+
+      background: var(--cool-d);
+
+      border-left-color: var(--cool)
+
+    }
+
+    .ni.active svg {
+
+      opacity: 1
+
+    }
+
+    .sb-foot {
+
+      padding: 12px 16px;
+
+      border-top: 1px solid var(--brd)
+
+    }
+
+    .sb-av {
+
+      width: 32px;
+
+      height: 32px;
+
+      border-radius: 50%;
+
+      background: linear-gradient(135deg, var(--cool), var(--eco));
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      font-family: var(--fh);
+
+      font-weight: 800;
+
+      font-size: 11px;
+
+      color: #fff;
+
+      flex-shrink: 0
+
+    }
+
+    .sb-user {
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 9px
+
+    }
+
+    .sb-un {
+
+      font-size: 12px;
+
+      font-weight: 600;
+
+      color: var(--t1)
+
+    }
+
+    .sb-ur {
+
+      font-size: 10px;
+
+      color: var(--t3)
+
+    }
+
+    /* ”—€ Main ”—€ */
+
+    .main {
+
+      flex: 1;
+
+      display: flex;
+
+      flex-direction: column;
+
+      overflow: hidden;
+
+      min-width: 0
+
+    }
+
+    .topbar {
+
+      padding: 12px 20px;
+
+      border-bottom: 1px solid var(--brd);
+
+      background: var(--bg1);
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
+
+      flex-shrink: 0
+
+    }
+
+    .nav-header {
+
+      position: relative;
+
+      display: flex;
+
+      width: fit-content;
+
+      border-radius: 9999px;
+
+      border: 1px solid rgba(139, 148, 158, 0.2);
+
+      background: #0c1526;
+
+      padding: 4px;
+
+      list-style: none;
+
+    }
+
+    .nav-tab {
+
+      position: relative;
+
+      z-index: 10;
+
+      display: block;
+
+      cursor: pointer;
+
+      padding: 6px 16px;
+
+      font-size: 12px;
+
+      text-transform: uppercase;
+
+      color: #fff;
+
+      mix-blend-mode: difference;
+
+      font-weight: 700;
+
+      font-family: var(--fh);
+
+      user-select: none;
+
+    }
+
+    .nav-cursor {
+
+      position: absolute;
+
+      z-index: 0;
+
+      height: calc(100% - 8px);
+
+      border-radius: 9999px;
+
+      background: #fff;
+
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+      top: 4px;
+
+      left: 0;
+
+      width: 0;
+
+      opacity: 0;
+
+      pointer-events: none;
+
+    }
+
+    .tb-right {
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 8px
+
+    }
+
+    .status {
+
+      display: inline-flex;
+
+      align-items: center;
+
+      gap: 5px;
+
+      font-size: 11px;
+
+      font-weight: 600;
+
+      color: var(--t2)
+
+    }
+
+    .pulse {
+
+      width: 7px;
+
+      height: 7px;
+
+      border-radius: 50%;
+
+      background: var(--eco);
+
+      animation: pulse 2s infinite
+
+    }
+
+    @keyframes pulse {
+
+      0%,
+
+      100% {
+
+        opacity: 1;
+
+        transform: scale(1)
+
+      }
+
+      50% {
+
+        opacity: .5;
+
+        transform: scale(.8)
+
+      }
+
+    }
+
+    /* ”—€ Buttons ”—€ */
+
+    .btn {
+
+      display: inline-flex;
+
+      align-items: center;
+
+      gap: 6px;
+
+      padding: 7px 13px;
+
+      border-radius: 7px;
+
+      font-size: 12px;
+
+      font-weight: 600;
+
+      cursor: pointer;
+
+      transition: all .15s;
+
+      font-family: var(--fb);
+
+      border: none;
+
+      outline: none
+
+    }
+
+    .btn-ghost {
+
+      background: transparent;
+
+      color: var(--t2);
+
+      border: 1px solid var(--brd)
+
+    }
+
+    .btn-ghost:hover {
+
+      background: var(--bg2);
+
+      color: var(--t1);
+
+      border-color: var(--brdh)
+
+    }
+
+    .btn-primary {
+
+      background: var(--cool);
+
+      color: #fff
+
+    }
+
+    .btn-primary:hover {
+
+      filter: brightness(1.15)
+
+    }
+
+    .btn-sm {
+
+      padding: 5px 10px;
+
+      font-size: 11px;
+
+      border-radius: 6px
+
+    }
+
+    .btn svg {
+
+      width: 13px;
+
+      height: 13px
+
+    }
+
+    /* ”—€ Views ”—€ */
+
+    .views {
+
+      flex: 1;
+
+      overflow: hidden;
+
+      min-height: 0;
+
+      display: flex;
+
+      flex-direction: column
+
+    }
+
+    .view {
+
+      padding: 16px 20px;
+
+      display: none;
+
+      animation: fadeIn .25s ease;
+
+      flex: 1;
+
+      min-height: 0;
+
+      overflow-y: auto;
+
+      overflow-x: hidden
+
+    }
+
+    .view.active {
+
+      display: flex;
+
+      flex-direction: column
+
+    }
+
+    /* ”—€ Psychro / Designer shared ”—€ */
+
+    .psychro-wrap { display:flex; flex-direction:column; gap:8px; flex:1; min-height:0; overflow:hidden; padding-bottom:4px }
+
+    .psychro-main { display:flex; flex-direction:column; gap:8px; min-height:0; overflow:hidden; flex:1 }
+
+    .psychro-ctrl { display:flex; gap:6px; flex-wrap:wrap; flex-shrink:0 }
+
+    .pctrl { padding:3px 10px; border-radius:6px; font-size:11px; cursor:pointer; border:1px solid var(--brd); background:transparent; color:var(--t2); font-family:var(--fb); transition:all .15s }
+
+    .pctrl:hover { border-color:var(--brdh); color:var(--t1) }
+
+    .pctrl.on { background:var(--cool-d); border-color:var(--cool); color:var(--cool) }
+
+    .psychro-svg-wrap { background:var(--bg2); border:1px solid var(--brd); border-radius:var(--rl); padding:12px; flex:1; min-height:0; max-height:calc(100vh - 280px); overflow:hidden; position:relative }
+
+    .psychro-info { display:flex; gap:7px; flex-shrink:0; flex-wrap:nowrap; overflow-x:auto; padding-bottom:4px; height:72px }
+
+    .pi-card { background:var(--bg3); border:1px solid var(--brd); border-radius:var(--r); padding:6px 10px; text-align:center; min-width:130px; flex-shrink:0 }
+
+    .pi-point { font-family:var(--fh); font-size:13px; font-weight:800; margin-bottom:1px }
+
+    .pi-name { font-size:9.5px; color:var(--t2); font-weight:500; text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px }
+
+    .pi-row { display:flex; justify-content:space-between; font-size:10px }
+
+    .pi-key { color:var(--t3) } .pi-val { font-family:var(--fm); color:var(--t1) }
+
+    .psychro-side { display:none }
+
+    .side-card { background:var(--bg2); border:1px solid var(--brd); border-radius:var(--rl); padding:12px }
+
+    .side-title { font-family:var(--fh); font-size:10.5px; font-weight:700; color:var(--t2); text-transform:uppercase; letter-spacing:.08em; margin-bottom:9px }
+
+    .side-row { display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid var(--brd) }
+
+    .side-row:last-child { border-bottom:none }
+
+    .side-key { font-size:11px; color:var(--t2) }
+
+    .side-val { font-family:var(--fm); font-size:11.5px; color:var(--t1) }
+
+    .legend-item { display:flex; align-items:center; gap:7px; padding:3px 0; font-size:11px; color:var(--t2) }
+
+    .legend-line { width:20px; height:2px; border-radius:1px }
+
+    /* ”—€ Designer ”—€ */
+
+    .designer-wrap { display:grid; grid-template-columns:1fr 240px; gap:12px; flex:1; min-height:0 }
+
+    .designer-main { display:flex; flex-direction:column; gap:10px; min-height:0 }
+
+    .toolbar { display:flex; align-items:center; gap:6px; flex-wrap:wrap; background:var(--bg2); border:1px solid var(--brd); border-radius:var(--r); padding:8px 12px; flex-shrink:0 }
+
+    .comp-pill { display:flex; align-items:center; gap:5px; padding:4px 9px; border-radius:6px; border:1px solid var(--brd); background:var(--bg3); color:var(--t2); font-size:11px; cursor:pointer; transition:all .15s }
+
+    .comp-pill:hover { border-color:var(--cool); color:var(--cool); background:var(--cool-d) }
+
+    .designer-canvas { background:var(--bg2); border:1px solid var(--brd); border-radius:var(--rl); flex:1; overflow:hidden }
+
+    .designer-side { display:flex; flex-direction:column; gap:10px; overflow-y:auto }
+
+    .comp-detail { background:var(--bg2); border:1px solid var(--brdh); border-radius:var(--rl); padding:12px }
+
+    .comp-detail-title { font-family:var(--fh); font-size:12.5px; font-weight:700; color:var(--cool); margin-bottom:2px }
+
+    .comp-detail-sub { font-size:10.5px; color:var(--t3); margin-bottom:10px }
+
+    .param-row { margin-bottom:8px }
+
+    .param-label { font-size:10.5px; color:var(--t2); margin-bottom:3px }
+
+    .param-ctrl { display:flex; align-items:center; gap:6px }
+
+    .param-ctrl input[type=range] { flex:1 }
+
+    .param-ctrl-val { font-family:var(--fm); font-size:11px; color:var(--cool); min-width:40px; text-align:right }
+
+    @keyframes fadeIn {
+
+      from {
+
+        opacity: 0;
+
+        transform: translateY(4px)
+
+      }
+
+      to {
+
+        opacity: 1;
+
+        transform: translateY(0)
+
+      }
+
+    }
+
+    /* ”—€ Cards ”—€ */
+
+    .card {
+
+      background: var(--bg2);
+
+      border: 1px solid var(--brd);
+
+      border-radius: var(--rl);
+
+      padding: 14px 16px
+
+    }
+
+    .card-hd {
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
+
+      margin-bottom: 10px
+
+    }
+
+    .card-title {
+
+      font-family: var(--fh);
+
+      font-size: 12px;
+
+      font-weight: 700;
+
+      color: var(--t1)
+
+    }
+
+    .tag {
+
+      display: inline-flex;
+
+      align-items: center;
+
+      gap: 4px;
+
+      padding: 2px 7px;
+
+      border-radius: 20px;
+
+      font-size: 10px;
+
+      font-weight: 600
+
+    }
+
+    .tag-cool {
+
+      background: var(--cool-d);
+
+      color: var(--cool)
+
+    }
+
+    .tag-eco {
+
+      background: var(--eco-d);
+
+      color: var(--eco)
+
+    }
+
+    .tag-heat {
+
+      background: var(--heat-d);
+
+      color: var(--heat)
+
+    }
+
+    .tag-alert {
+
+      background: var(--alert-d);
+
+      color: var(--alert)
+
+    }
+
+    /* ”—€ KPI Grid ”—€ */
+
+    .kpi-grid {
+
+      display: grid;
+
+      grid-template-columns: repeat(4, 1fr);
+
+      gap: 10px;
+
+      margin-bottom: 14px;
+
+      flex-shrink: 0
+
+    }
+
+    .kpi {
+
+      background: var(--bg2);
+
+      border: 1px solid var(--brd);
+
+      border-radius: var(--rl);
+
+      padding: 12px 14px;
+
+      position: relative;
+
+      overflow: hidden;
+
+      transition: all .2s;
+
+      cursor: default
+
+    }
+
+    .kpi:hover {
+
+      border-color: var(--brdh);
+
+      background: var(--bg3)
+
+    }
+
+    .kpi::after {
+
+      content: '';
+
+      position: absolute;
+
+      top: 0;
+
+      left: 0;
+
+      right: 0;
+
+      height: 2px
+
+    }
+
+    .kpi.k-cool::after {
+
+      background: var(--cool)
+
+    }
+
+    .kpi.k-alert::after {
+
+      background: var(--alert)
+
+    }
+
+    .kpi.k-eco::after {
+
+      background: var(--eco)
+
+    }
+
+    .kpi.k-heat::after {
+
+      background: var(--heat)
+
+    }
+
+    .kpi-label {
+
+      font-size: 9.5px;
+
+      color: var(--t2);
+
+      font-weight: 600;
+
+      text-transform: uppercase;
+
+      letter-spacing: .06em;
+
+      margin-bottom: 6px
+
+    }
+
+    .kpi-val {
+
+      font-family: var(--fh);
+
+      font-size: 22px;
+
+      font-weight: 800;
+
+      line-height: 1;
+
+      margin-bottom: 4px
+
+    }
+
+    .kpi-unit {
+
+      font-size: 11px;
+
+      font-weight: 400;
+
+      color: var(--t2);
+
+      margin-left: 2px
+
+    }
+
+    .kpi-delta {
+
+      font-size: 10.5px
+
+    }
+
+    .kpi-delta.up {
+
+      color: var(--eco)
+
+    }
+
+    .kpi-delta.dn {
+
+      color: var(--alert)
+
+    }
+
+    .kpi-sparkline {
+
+      height: 28px;
+
+      margin-top: 5px
+
+    }
+
+    /* ”—€ Simulation View ”—€ */
+
+    .sim-split {
+
+      display: flex;
+
+      flex-direction: column;
+
+      flex: 1;
+
+      min-height: 0;
+
+      gap: 10px
+
+    }
+
+    .flow-panel {
+
+      background: var(--bg2);
+
+      border: 1px solid var(--brd);
+
+      border-radius: var(--rl);
+
+      display: flex;
+
+      flex-direction: column;
+
+      overflow: hidden;
+
+      position: relative
+
+    }
+
+    .flow-panel-hd {
+
+      padding: 10px 14px;
+
+      border-bottom: 1px solid var(--brd);
+
+      flex-shrink: 0;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between
+
+    }
+
+    .flow-panel-title {
+
+      font-family: var(--fh);
+
+      font-size: 11.5px;
+
+      font-weight: 700;
+
+      color: var(--t1)
+
+    }
+
+    .view-toggle {
+
+      display: flex;
+
+      gap: 3px;
+
+      background: var(--bg3);
+
+      border-radius: 7px;
+
+      padding: 3px
+
+    }
+
+    .vt-btn {
+
+      padding: 3px 9px;
+
+      border-radius: 5px;
+
+      font-size: 10.5px;
+
+      cursor: pointer;
+
+      border: none;
+
+      background: transparent;
+
+      color: var(--t2);
+
+      font-family: var(--fb);
+
+      font-weight: 600;
+
+      transition: all .15s
+
+    }
+
+    .vt-btn.active {
+
+      background: var(--bg1);
+
+      color: var(--cool);
+
+      box-shadow: 0 1px 4px rgba(0, 0, 0, .4)
+
+    }
+
+    #three-wrap {
+
+      flex: 1;
+
+      position: relative;
+
+      overflow: hidden;
+
+      display: block
+
+    }
+
+    #three-wrap canvas {
+
+      display: block;
+
+      width: 100% !important;
+
+      height: 100% !important
+
+    }
+
+    #svg-wrap {
+
+      flex: 1;
+
+      display: none;
+
+      overflow: hidden
+
+    }
+
+    #svg-wrap.show {
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center
+
+    }
+
+    #three-wrap.hide {
+
+      display: none
+
+    }
+
+    .flow-legend {
+
+      padding: 8px 14px;
+
+      border-top: 1px solid var(--brd);
+
+      display: flex;
+
+      gap: 12px;
+
+      flex-wrap: wrap;
+
+      flex-shrink: 0
+
+    }
+
+    .fl-item {
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 5px;
+
+      font-size: 10.5px;
+
+      color: var(--t2)
+
+    }
+
+    .fl-dot {
+
+      width: 7px;
+
+      height: 7px;
+
+      border-radius: 50%
+
+    }
+
+    /* ”—€ Controls Panel ”—€ */
+
+    .ctrl-panel {
+
+      background: var(--bg2);
+
+      border: 1px solid var(--brd);
+
+      border-radius: var(--rl);
+
+      display: flex;
+
+      flex-direction: column;
+
+      overflow: hidden
+
+    }
+
+    .ctrl-panel-hd {
+
+      padding: 12px 16px;
+
+      border-bottom: 1px solid var(--brd);
+
+      flex-shrink: 0;
+
+      font-family: var(--fh);
+
+      font-size: 13px;
+
+      font-weight: 700;
+
+      color: var(--t1);
+
+      letter-spacing: .05em
+
+    }
+
+    .ctrl-body {
+
+      flex: 1;
+
+      overflow-y: auto;
+
+      padding: 14px 16px;
+
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 12px
+
+    }
+
+    .ctrl-group {
+
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 4px
+
+    }
+
+    .ctrl-top {
+
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center
+
+    }
+
+    .ctrl-label {
+
+      font-size: 12.5px;
+
+      color: var(--t2);
+
+      font-weight: 500
+
+    }
+
+    .ctrl-val-wrap {
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 6px
+
+    }
+
+    .ctrl-val {
+
+      font-family: var(--fm);
+
+      font-size: 14px;
+
+      font-weight: 700;
+
+      color: var(--t1)
+
+    }
+
+    .ctrl-badge {
+
+      font-size: 9px;
+
+      padding: 1px 5px;
+
+      border-radius: 10px;
+
+      font-weight: 700
+
+    }
+
+    .badge-ok {
+
+      background: var(--eco-d);
+
+      color: var(--eco)
+
+    }
+
+    .badge-warn {
+
+      background: var(--hum-d);
+
+      color: var(--hum)
+
+    }
+
+    .badge-bad {
+
+      background: var(--alert-d);
+
+      color: var(--alert)
+
+    }
+
+    input[type=range] {
+
+      width: 100%;
+
+      height: 5px;
+
+      cursor: pointer;
+
+      -webkit-appearance: none;
+
+      appearance: none;
+
+      background: var(--bg3);
+
+      border-radius: 3px;
+
+      outline: none
+
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+
+      -webkit-appearance: none;
+
+      width: 16px;
+
+      height: 16px;
+
+      border-radius: 50%;
+
+      background: var(--cool);
+
+      cursor: pointer;
+
+      transition: box-shadow .15s;
+
+      box-shadow: 0 0 0 3px var(--cool-d)
+
+    }
+
+    input[type=range]::-webkit-slider-thumb:hover {
+
+      box-shadow: 0 0 0 5px var(--cool-d)
+
+    }
+
+    input[type=range].heat-sl::-webkit-slider-thumb {
+
+      background: var(--heat);
+
+      box-shadow: 0 0 0 2px var(--heat-d)
+
+    }
+
+    input[type=range].eco-sl::-webkit-slider-thumb {
+
+      background: var(--eco);
+
+      box-shadow: 0 0 0 2px var(--eco-d)
+
+    }
+
+    input[type=range].out-sl::-webkit-slider-thumb {
+
+      background: var(--outdoor);
+
+      box-shadow: 0 0 0 2px var(--outdoor-d)
+
+    }
+
+    .comfort-bar {
+
+      height: 2px;
+
+      border-radius: 1px;
+
+      background: var(--bg3);
+
+      margin-top: 2px;
+
+      overflow: hidden
+
+    }
+
+    .comfort-fill {
+
+      height: 100%;
+
+      border-radius: 1px;
+
+      transition: width .3s, background .3s
+
+    }
+
+    .sub-label {
+
+      font-size: 11px;
+
+      color: var(--t3)
+
+    }
+
+    /* ”—€ Energy Block ”—€ */
+
+    .energy-block {
+
+      background: var(--bg3);
+
+      border: 1px solid var(--brd);
+
+      border-radius: var(--r);
+
+      padding: 14px 16px;
+
+      flex-shrink: 0
+
+    }
+
+    .energy-title {
+
+      font-size: 12px;
+
+      font-weight: 700;
+
+      color: var(--hum);
+
+      text-transform: uppercase;
+
+      letter-spacing: .08em;
+
+      margin-bottom: 10px
+
+    }
+
+    .eb-row {
+
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center;
+
+      padding: 5px 0;
+
+      border-bottom: 1px solid var(--brd)
+
+    }
+
+    .eb-row:last-child {
+
+      border-bottom: none
+
+    }
+
+    .eb-key {
+
+      font-size: 12.5px;
+
+      color: var(--t2);
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 6px
+
+    }
+
+    .eb-val {
+
+      font-family: var(--fm);
+
+      font-size: 14px;
+
+      font-weight: 700;
+
+      color: var(--t1)
+
+    }
+
+    .eb-divider {
+
+      height: 1px;
+
+      background: var(--brdh);
+
+      margin: 4px 0
+
+    }
+
+    /* ”—€ Bottom Strip ”—€ */
+
+    .sim-bottom {
+
+      display: grid;
+
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+
+      gap: 10px;
+
+      height: 270px;
+
+      flex-shrink: 0
+
+    }
+
+    .mini-panel {
+
+      background: var(--bg2);
+
+      border: 1px solid var(--brd);
+
+      border-radius: var(--rl);
+
+      padding: 12px 14px;
+
+      cursor: pointer;
+
+      transition: border-color .2s;
+
+      overflow: hidden;
+
+      display: flex;
+
+      flex-direction: column
+
+    }
+
+    .mini-panel:hover {
+
+      border-color: var(--brdh)
+
+    }
+
+    .mini-panel-title {
+
+      font-size: 11px;
+
+      font-weight: 700;
+
+      color: var(--t2);
+
+      text-transform: uppercase;
+
+      letter-spacing: .07em;
+
+      margin-bottom: 8px;
+
+      flex-shrink: 0
+
+    }
+
+    /* ”—€ Dashboard ”—€ */
+
+    #view-dashboard {
+
+      overflow: hidden;
+
+    }
+
+    .charts-row {
+
+      display: grid;
+
+      grid-template-columns: 2fr 1fr;
+
+      grid-template-rows: 1fr;
+
+      gap: 12px;
+
+      flex: 1;
+
+      min-height: 0;
+
+      overflow: hidden
+
+    }
+
+    .charts-row .card { display:flex; flex-direction:column; min-height:0; overflow:hidden; height:100% }
+    .charts-row .card canvas { width:100% !important; height:100% !important; }
+
+    /* ”—€ 3D Overlay Controls ”—€ */
+
+    .three-controls {
+
+      position: absolute;
+
+      bottom: 12px;
+
+      right: 12px;
+
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 6px;
+
+      z-index: 10
+
+    }
+
+    .tc-btn {
+
+      width: 32px; height: 32px;
+
+      background: rgba(13,17,23,0.85);
+
+      border: 1px solid var(--brd);
+
+      border-radius: 8px;
+
+      color: var(--t2);
+
+      font-size: 14px;
+
+      cursor: pointer;
+
+      display: flex; align-items: center; justify-content: center;
+
+      transition: all .15s;
+
+      backdrop-filter: blur(6px);
+
+      user-select: none
+
+    }
+
+    .tc-btn:hover { background: var(--bg2); border-color: var(--brdh); color: var(--t1) }
+
+    .tc-btn.on { background: var(--cool-d); border-color: var(--cool); color: var(--cool) }
+
+    .tc-btn-group { display:flex; flex-direction:column; gap:3px; background:rgba(13,17,23,0.8); border:1px solid var(--brd); border-radius:9px; padding:4px; backdrop-filter:blur(6px) }
+
+    /* ”—€ Projects ”—€ */
+
+    .proj-header {
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
+
+      margin-bottom: 14px
+
+    }
+
+    .proj-grid {
+
+      display: grid;
+
+      grid-template-columns: repeat(3, 1fr);
+
+      gap: 10px
+
+    }
+
+    .pcard {
+
+      background: var(--bg2);
+
+      border: 1px solid var(--brd);
+
+      border-radius: var(--rl);
+
+      padding: 14px;
+
+      cursor: pointer;
+
+      transition: all .2s;
+
+      display: flex;
+
+      flex-direction: column
+
+    }
+
+    .pcard:hover {
+
+      border-color: var(--brdh);
+
+      background: var(--bg3);
+
+      transform: translateY(-2px)
+
+    }
+
+    .pcard-badge {
+
+      width: 32px;
+
+      height: 32px;
+
+      border-radius: 8px;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      margin-bottom: 10px;
+
+      font-size: 15px
+
+    }
+
+    .pcard-name {
+
+      font-family: var(--fh);
+
+      font-size: 13px;
+
+      font-weight: 700;
+
+      color: var(--t1);
+
+      margin-bottom: 4px
+
+    }
+
+    .pcard-desc {
+
+      font-size: 11.5px;
+
+      color: var(--t2);
+
+      line-height: 1.5;
+
+      margin-bottom: 10px;
+
+      flex: 1
+
+    }
+
+    .pcard-foot {
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
+
+      font-size: 10.5px;
+
+      color: var(--t3)
+
+    }
+
+    .pcard.new-card {
+
+      border: 2px dashed var(--brd);
+
+      background: transparent;
+
+      color: var(--t3);
+
+      align-items: center;
+
+      justify-content: center;
+
+      gap: 8px;
+
+      min-height: 150px
+
+    }
+
+    .pcard.new-card:hover {
+
+      border-color: var(--cool);
+
+      color: var(--cool)
+
+    }
+
+    /* ”—€ SVG flow particles ”—€ */
+
+    .particle {
+
+      fill: currentColor;
+
+      filter: drop-shadow(0 0 3px currentColor)
+
+    }
+
+    .particle.return {
+
+      color: var(--heat)
+
+    }
+
+    .particle.supply {
+
+      color: var(--cool)
+
+    }
+
+    .particle.outdoor {
+
+      color: var(--outdoor)
+
+    }
+
+    .particle.mixed {
+
+      color: var(--eco)
+
+    }
+
+    @keyframes spin {
+
+      from {
+
+        transform: rotate(0deg)
+
+      }
+
+      to {
+
+        transform: rotate(360deg)
+
+      }
+
+    }
+
+    .fan-spin {
+
+      transform-origin: 178px 198px;
+
+      animation: spin 1.5s linear infinite
+
+    }
+
+    /* ”—€ Scrollbar ”—€ */
+
+    ::-webkit-scrollbar {
+
+      width: 3px;
+
+      height: 3px
+
+    }
+
+    ::-webkit-scrollbar-track {
+
+      background: transparent
+
+    }
+
+    ::-webkit-scrollbar-thumb {
+
+      background: var(--t3);
+
+      border-radius: 2px
+
+    }
+
+    /* ”—€ Simulation Action Bar ”—€ */
+
+    .ctrl-actions {
+
+      padding: 10px 12px;
+
+      border-top: 1px solid var(--brd);
+
+      display: flex;
+
+      gap: 6px;
+
+      flex-shrink: 0
+
+    }
+
+    .btn-run {
+
+      background: linear-gradient(135deg, var(--cool), var(--eco));
+
+      color: #fff;
+
+      flex: 1;
+
+      justify-content: center;
+
+      font-weight: 700;
+
+      letter-spacing: .03em
+
+    }
+
+    .btn-run:hover { filter: brightness(1.12) }
+
+    .btn-run.loading { opacity: .75; pointer-events: none }
+
+    .sim-panel-actions {
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 6px
+
+    }
+
+    .three-labels {
+
+      position: absolute;
+
+      top: 0;
+
+      left: 0;
+
+      width: 100%;
+
+      height: 100%;
+
+      pointer-events: none
+
+    }
+
+    .three-label {
+
+      position: absolute;
+
+      font-family: var(--fh);
+
+      font-size: 10px;
+
+      font-weight: 700;
+
+      color: var(--t2);
+
+      background: rgba(13, 17, 23, 0.7);
+
+      padding: 2px 6px;
+
+      border-radius: 4px;
+
+      border: 1px solid var(--brd);
+
+      transform: translate(-50%, -50%);
+
+      white-space: nowrap;
+
+      opacity: 0;
+
+      transition: opacity .3s
+
+    }
+
+    .three-label.show {
+
+      opacity: 1
+
+    }
+
+  
+    /* ── SIMULATION CONSOLE REDESIGN ── */
+    .topbar {
+      padding: 6px 16px;
+      background: rgba(10,15,25,0.82);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(139,148,158,0.08);
+    }
+    #view-simulation.view.active {
+      padding: 0;
+      overflow: hidden;
+    }
+    .sim-console {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      grid-template-rows: 1fr auto 200px;
+      height: 100%;
+      min-height: 0;
+      background: #0B1020;
+    }
+    /* Left Control Rail */
+    .sim-rail {
+      grid-row: 1 / 4;
+      background: #0e1420;
+      border-right: 1px solid rgba(139,148,158,0.08);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: 0;
+    }
+    .rail-section {
+      padding: 12px 16px 8px;
+    }
+    .rail-section-title {
+      font-family: var(--fh);
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--t3);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(139,148,158,0.06);
+    }
+    .rail-ctrl {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      margin-bottom: 10px;
+    }
+    .rail-ctrl-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .rail-ctrl-label {
+      font-size: 11px;
+      color: var(--t2);
+      font-weight: 500;
+    }
+    .rail-ctrl-val {
+      font-family: var(--fm);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--t1);
+    }
+    .rail-ctrl input[type=range] {
+      height: 3px;
+      background: rgba(139,148,158,0.12);
+    }
+    .rail-sub {
+      display: flex;
+      justify-content: space-between;
+      font-size: 9.5px;
+      color: var(--t3);
+      margin-top: 1px;
+    }
+    .rail-launch {
+      padding: 12px 16px;
+      margin-top: auto;
+      border-top: 1px solid rgba(139,148,158,0.06);
+    }
+    .rail-launch .btn-run {
+      width: 100%;
+      padding: 8px 0;
+      font-size: 11.5px;
+      border-radius: 8px;
+    }
+    /* Hero Canvas */
+    .sim-canvas-area {
+      position: relative;
+      overflow: hidden;
+      background: #0B1020;
+      min-height: 0;
+    }
+    .sim-canvas-area #three-wrap {
+      position: absolute;
+      inset: 0;
+    }
+    .sim-canvas-area #svg-wrap {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      background: #0B1020;
+    }
+    .sim-canvas-area #svg-wrap.show {
+      opacity: 1;
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .sim-canvas-area #svg-wrap.show {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Floating overlays */
+    .sim-overlay-tl {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .sys-chip {
+      background: rgba(10,15,25,0.85);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(139,148,158,0.1);
+      border-radius: 10px;
+      padding: 10px 14px;
+      min-width: 160px;
+    }
+    .sys-chip-name {
+      font-family: var(--fh);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--cool);
+      margin-bottom: 4px;
+    }
+    .sys-chip-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--t2);
+      padding: 1px 0;
+    }
+    .sys-chip-row span:last-child {
+      font-family: var(--fm);
+      color: var(--t1);
+      font-weight: 600;
+    }
+    .sim-overlay-tr {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sim-legend-float {
+      display: flex;
+      gap: 10px;
+      background: rgba(10,15,25,0.8);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(139,148,158,0.08);
+      border-radius: 8px;
+      padding: 5px 10px;
+    }
+    .sim-legend-float .fl-item { font-size: 9.5px; }
+    .sim-legend-float .fl-dot { width: 6px; height: 6px; }
+    /* Telemetry + Psychro row */
+    .sim-analytics {
+      display: flex;
+      flex-direction: column;
+      border-top: 1px solid rgba(139,148,158,0.06);
+      flex-shrink: 0;
+    }
+    .sim-telemetry-row {
+      display: flex;
+      height: 80px;
+      flex-shrink: 0;
+      border-bottom: 1px solid rgba(139,148,158,0.05);
+    }
+    .sim-bottom-row {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      flex: 1;
+      min-height: 0;
+      height: 200px;
+    }
+    .telemetry-strip {
+      display: flex;
+      align-items: stretch;
+      overflow-x: auto;
+      background: #0a0f1a;
+      gap: 0;
+    }
+    .tel-cell {
+      flex: 1;
+      min-width: 90px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border-right: 1px solid rgba(139,148,158,0.04);
+      transition: background 0.15s;
+    }
+    .tel-cell:hover { background: rgba(139,148,158,0.03); }
+    .tel-cell:last-child { border-right: none; }
+    .tel-val {
+      font-family: var(--fh);
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--t1);
+    }
+    .tel-unit {
+      font-size: 10px;
+      color: var(--t3);
+      font-weight: 400;
+      margin-left: 2px;
+    }
+    .tel-label {
+      font-size: 8.5px;
+      font-weight: 700;
+      color: var(--t3);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 4px;
+    }
+    .psychro-mini-panel {
+      background: #0c1222;
+      border-left: 1px solid rgba(139,148,158,0.06);
+      display: flex;
+      flex-direction: column;
+      padding: 10px 14px;
+      overflow: hidden;
+    }
+    .psychro-mini-panel svg#mini-psychro {
+      width: 100%;
+      height: 100%;
+      flex: 1;
+      min-height: 0;
+      display: block;
+    }
+    .psychro-mini-panel svg#mini-psychro {
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+    }
+    .psychro-mini-panel .mini-panel-title {
+      font-size: 9px;
+      margin-bottom: 4px;
+    }
+    .psychro-mini-panel svg {
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+    }
+    /* Timeline */
+    .sim-timeline {
+      background: #0a0f1a;
+      border-right: 1px solid rgba(139,148,158,0.06);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .timeline-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid rgba(139,148,158,0.06);
+      flex-shrink: 0;
+    }
+    .timeline-tab {
+      padding: 6px 16px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--t3);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      font-family: var(--fh);
+    }
+    .timeline-tab:hover { color: var(--t2); }
+    .timeline-tab.active {
+      color: var(--cool);
+      border-bottom-color: var(--cool);
+    }
+    .timeline-content {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      padding: 6px 10px;
+      overflow: hidden;
+    }
+    .timeline-content canvas {
+      position: absolute;
+      inset: 6px 10px;
+      width: calc(100% - 20px) !important;
+      height: calc(100% - 12px) !important;
+    }
+    .timeline-content canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+
+    /* ── PSYCHRO ANALYTICAL WORKSPACE ── */
+    #view-psychro.view.active {
+      padding: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: row;
+    }
+    .psy-workspace {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      background: #080d18;
+      position: relative;
+    }
+    /* Left toolbox */
+    .psy-toolbox {
+      width: 180px;
+      flex-shrink: 0;
+      background: #0e1420;
+      border-right: 1px solid rgba(139,148,158,0.07);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      z-index: 20;
+    }
+    .psy-tool-section {
+      padding: 10px 12px 6px;
+      border-bottom: 1px solid rgba(139,148,158,0.05);
+    }
+    .psy-tool-title {
+      font-family: var(--fh);
+      font-size: 8.5px;
+      font-weight: 700;
+      color: var(--t3);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 8px;
+    }
+    .psy-layer-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 4px 2px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.1s;
+    }
+    .psy-layer-row:hover { background: rgba(139,148,158,0.05); }
+    .psy-layer-check {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      border: 1.5px solid var(--brdh);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.1s;
+    }
+    .psy-layer-check.on {
+      background: var(--cool);
+      border-color: var(--cool);
+    }
+    .psy-layer-check.on::after {
+      content: '';
+      width: 6px;
+      height: 4px;
+      border-left: 1.5px solid #fff;
+      border-bottom: 1.5px solid #fff;
+      transform: rotate(-45deg) translateY(-1px);
+      display: block;
+    }
+    .psy-layer-label {
+      font-size: 11px;
+      color: var(--t2);
+      font-weight: 500;
+      line-height: 1;
+    }
+    .psy-tool-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 6px;
+      border-radius: 5px;
+      font-size: 10.5px;
+      color: var(--t2);
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: var(--fb);
+      width: 100%;
+      text-align: left;
+      transition: background 0.1s;
+    }
+    .psy-tool-btn:hover { background: rgba(139,148,158,0.06); color: var(--t1); }
+    .psy-tool-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
+    /* Main chart area */
+    .psy-canvas-wrap {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+    .psy-svg-container {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      overflow: hidden;
+      cursor: grab;
+    }
+    .psy-svg-container:active { cursor: grabbing; }
+    .psy-svg-container svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    /* Zoom controls overlay */
+    .psy-zoom-controls {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .pzy-btn {
+      width: 28px;
+      height: 28px;
+      background: rgba(14,20,32,0.9);
+      border: 1px solid rgba(139,148,158,0.12);
+      border-radius: 6px;
+      color: var(--t2);
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      backdrop-filter: blur(8px);
+    }
+    .pzy-btn:hover { background: var(--bg2); color: var(--t1); border-color: var(--brdh); }
+    /* Crosshair readout */
+    .psy-readout {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      background: rgba(14,20,32,0.88);
+      border: 1px solid rgba(139,148,158,0.1);
+      border-radius: 7px;
+      padding: 6px 10px;
+      font-family: var(--fm);
+      font-size: 10px;
+      color: var(--t2);
+      z-index: 30;
+      backdrop-filter: blur(8px);
+      pointer-events: none;
+    }
+    /* Bottom state dock */
+    .psy-state-dock {
+      height: 80px;
+      flex-shrink: 0;
+      background: #0a0f1a;
+      border-top: 1px solid rgba(139,148,158,0.06);
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      overflow-x: auto;
+    }
+    .psy-state-card {
+      flex: 1;
+      min-width: 150px;
+      max-width: 240px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border-right: 1px solid rgba(139,148,158,0.05);
+      cursor: pointer;
+      transition: background 0.15s;
+      position: relative;
+    }
+    .psy-state-card:last-child { border-right: none; }
+    .psy-state-card:hover { background: rgba(139,148,158,0.04); }
+    .psy-state-card.active { background: rgba(139,148,158,0.07); }
+    .psy-state-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      border-radius: 0;
+    }
+    .psy-state-name {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+    .psy-state-temp {
+      font-family: var(--fh);
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 2px;
+    }
+    .psy-state-meta {
+      font-size: 9.5px;
+      color: var(--t3);
+      font-family: var(--fm);
+    }
+
+</style>
+
+</head>
+
+<body>
+
+    <div id="error-overlay" style="position:fixed;top:0;left:0;width:100%;height:100vh;background:rgba(0,0,0,0.8);color:red;z-index:999999;font-family:monospace;white-space:pre-wrap;overflow-y:auto;display:none;padding:20px;"></div>
+<script>
+window.onerror = function(msg, url, lineNo, columnNo, error) {
+    var overlay = document.getElementById('error-overlay');
+    if(overlay) {
+        overlay.style.display = 'block';
+        overlay.innerHTML += 'Error: ' + msg + '\nURL: ' + url + '\nLine: ' + lineNo + ':' + columnNo + '\nError object: ' + JSON.stringify(error) + '\n\n';
+    }
+    alert('JS Error: ' + msg + ' at line ' + lineNo);
+    return false;
+};
+window.addEventListener('unhandledrejection', function(event) {
+    var overlay = document.getElementById('error-overlay');
+    if(overlay) {
+        overlay.style.display = 'block';
+        overlay.innerHTML += 'Unhandled Promise Rejection: ' + event.reason + '\n\n';
+    }
+    alert('Promise Error: ' + event.reason);
+});
+</script>
+
+
+  <div class="app">
+
+    <!-- ══════════ SIDEBAR ══════════ -->
+
+    <aside class="sb">
+
+      <div class="sb-logo">
+
+        <div class="sb-brand">CTA-SIM PRO
+
+          <span>Plateforme de Simulation Avancée des<br>Centrales de Traitement d'Air</span>
+
+        </div>
+
+      </div>
+
+      <nav class="sb-nav">
+
+        <div class="nav-sec">Modélisation</div>
+
+        <div class="ni active" data-view="simulation">
+
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+
+          Simulation 3D
+
+        </div>
+
+        <div class="ni" data-view="psychro">
+
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 20 Q6 8 12 6 Q18 4 21 3"/><path d="M3 20 Q8 18 14 12"/><circle cx="9" cy="10" r="1.5" fill="currentColor"/><circle cx="14" cy="7" r="1.5" fill="currentColor"/></svg>
+
+          Psychrométrique
+
+        </div>
+
+        <div class="ni" data-view="designer">
+
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="9" width="5" height="6" rx="1"/><rect x="9.5" y="9" width="5" height="6" rx="1"/><rect x="17" y="9" width="5" height="6" rx="1"/><path d="M7 12h2.5M14.5 12H17"/></svg>
+
+          CTA Designer
+
+        </div>
+
+        <div class="nav-sec">Gestion</div>
+
+        <div class="ni" data-view="projects">
+
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h6l2-3h10v13H3z"/><path d="M3 7v10"/></svg>
+
+          LOCAL DISTRIBUTOR
+
+        </div>
+
+        <div class="ni" data-view="settings">
+
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+
+          Paramètres
+
+        </div>
+
+      </nav>
+
+      <div class="sb-foot">
+
+        <div class="sb-user">
+
+          <div class="sb-av">TS</div>
+
+          <div>
+
+            <div class="sb-un">TLILI SOULAYMEN</div>
+
+            <div class="sb-ur">Ingénieur CVC</div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </aside>
+
+    <!-- ══════════ MAIN ══════════ -->
+
+    <div class="main">
+
+      <div class="topbar">
+
+        <ul class="nav-header" id="nav-header">
+
+          <li class="nav-cursor" id="nav-cursor"></li>
+
+          <li class="nav-tab active" data-view="simulation">Simulation 3D</li>
+
+          <li class="nav-tab" data-view="psychro">Psychrométrique</li>
+
+          <li class="nav-tab" data-view="designer">CTA Designer</li>
+
+          <li class="nav-tab" data-view="projects">Local Distributor</li>
+
+          <li class="nav-tab" data-view="settings">Paramètres</li>
+
+        </ul>
+
+        <div class="tb-right">
+
+          <div id="api-badge" style="font-size:10.5px;font-family:var(--fm);color:var(--t3);padding:0 6px">🔴 Offline (Local)</div>
+
+          <div class="status">
+
+            <div class="pulse"></div>Système actif
+
+          </div>
+
+          <button class="btn btn-ghost btn-sm" onclick="window.print()">
+
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+
+              <polyline points="7 10 12 15 17 10" />
+
+              <line x1="12" y1="15" x2="12" y2="3" />
+
+            </svg>
+
+            Export PDF
+
+          </button>
+
+          <div style="height: 28px; width: 1px; background: var(--brd); margin: 0 4px;"></div>
+
+          <img src="Enstab-logo-3.png" alt="ENSTAB Logo" style="height: 32px; width: auto; object-fit: contain;">
+
+        </div>
+
+      </div>
+
+      <div class="views">
+
+        
+        <!-- SIMULATION CONSOLE -->
+        <div id="view-simulation" class="view active">
+          <div class="sim-console">
+
+            <!-- LEFT CONTROL RAIL -->
+            <div class="sim-rail">
+              <div class="rail-section">
+                <div class="rail-section-title">Environnement</div>
+                <div class="rail-ctrl">
+                  <div class="rail-ctrl-top"><span class="rail-ctrl-label">Temp. ext. (Tdb)</span><span class="rail-ctrl-val" id="v-tdb">34&deg;C</span></div>
+                  <input type="range" id="s-tdb" class="out-sl" min="-10" max="45" value="34">
+                </div>
+                <div class="rail-ctrl">
+                  <div class="rail-ctrl-top"><span class="rail-ctrl-label">Humidit&eacute; ext. (HR%)</span><span class="rail-ctrl-val" id="v-rh">50%</span></div>
+                  <input type="range" id="s-rh" min="10" max="100" value="50">
+                  <div class="rail-sub"><span>Twb: <span id="v-twb">&mdash;</span></span><span>W: <span id="v-wout">&mdash;</span></span></div>
+                </div>
+                <div class="rail-ctrl">
+                  <div class="rail-ctrl-top"><span class="rail-ctrl-label">% Air Neuf</span><span class="rail-ctrl-val" id="v-pct">40%</span></div>
+                  <input type="range" id="s-pct" class="eco-sl" min="0" max="100" value="40">
+                </div>
+              </div>
+              <div class="rail-section">
+                <div class="rail-section-title">D&eacute;bit</div>
+                <div class="rail-ctrl">
+                  <div class="rail-ctrl-top"><span class="rail-ctrl-label">D&eacute;bit (m&sup3;/h)</span><span class="rail-ctrl-val" id="v-flow">8 000</span></div>
+                  <input type="range" id="s-flow" min="1000" max="20000" step="500" value="8000">
+                  <div class="rail-sub"><span id="v-ach">ACH: 6.2</span><span>&#7745;: <span id="v-mdot">&mdash;</span></span></div>
+                </div>
+              </div>
+              <div class="rail-section">
+                <div class="rail-section-title">Soufflage &amp; Zone</div>
+                <div class="rail-ctrl">
+                  <div class="rail-ctrl-top"><span class="rail-ctrl-label">T soufflage</span><span class="rail-ctrl-val" id="v-tsup">13&deg;C</span></div>
+                  <input type="range" id="s-tsup" min="8" max="22" value="13">
+                </div>
+                <div class="rail-ctrl">
+                  <div class="rail-ctrl-top"><span class="rail-ctrl-label">Consigne zone</span><span class="rail-ctrl-val" id="v-troom">24&deg;C</span></div>
+                  <input type="range" id="s-troom" class="heat-sl" min="18" max="30" value="24">
+                </div>
+                <div class="rail-ctrl">
+                  <div class="rail-ctrl-top"><span class="rail-ctrl-label">HR% Zone</span><span class="rail-ctrl-val" id="v-rhroom">50%</span></div>
+                  <input type="range" id="s-rhroom" min="20" max="80" value="50">
+                  <div class="rail-sub"><span>W: <span id="v-wroom">&mdash;</span></span><span id="v-comfort" style="color:var(--eco)">ISO I</span></div>
+                </div>
+              </div>
+              <div class="rail-launch">
+                <button class="btn btn-run" id="btn-run-sim">
+                  <svg viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  Lancer Simulation
+                </button>
+              </div>
+            </div>
+
+            <!-- HERO 3D/2D CANVAS -->
+            <div class="sim-canvas-area">
+              <!-- Floating overlay: toggle + legend (top-right) -->
+              <div class="sim-overlay-tr">
+                <div class="sim-legend-float">
+                  <div class="fl-item"><div class="fl-dot" style="background:var(--heat)"></div>Repris</div>
+                  <div class="fl-item"><div class="fl-dot" style="background:var(--outdoor)"></div>Ext.</div>
+                  <div class="fl-item"><div class="fl-dot" style="background:var(--eco)"></div>Mix</div>
+                  <div class="fl-item"><div class="fl-dot" style="background:var(--cool)"></div>Souffl&eacute;</div>
+                </div>
+                <div class="view-toggle">
+                  <button class="vt-btn active" id="btn-3d">3D</button>
+                  <button class="vt-btn" id="btn-2d">2D</button>
+                  <button class="vt-btn" id="btn-fs" title="Plein écran" style="margin-left:8px;padding:0 8px;font-size:14px;">&#x26F6;</button>
+                </div>
+              </div>
+              <!-- 3D View -->
+              <div id="three-wrap">
+                <canvas id="three-canvas"></canvas>
+                <div class="three-labels" id="three-labels"></div>
+                <div class="three-controls">
+                  <div class="tc-btn-group">
+                    <button class="tc-btn on" id="tc-orbit" title="Rotation">&#x27F3;</button>
+                    <button class="tc-btn" id="tc-axes" title="Axes">&#x2295;</button>
+                  </div>
+                  <div class="tc-btn-group">
+                    <button class="tc-btn" id="tc-zin" title="Zoom +">+</button>
+                    <button class="tc-btn" id="tc-zout" title="Zoom -">-</button>
+                    <button class="tc-btn" id="tc-reset" title="Reset">&#x2302;</button>
+                  </div>
+                </div>
+              </div>
+              <!-- 2D View (hidden by default) -->
+              <div id="svg-wrap">
+                <svg id="flow-svg" viewBox="0 0 800 400" style="width:100%;height:100%;cursor:grab;">
+                  <!-- 2D schematic will be rendered here -->
+                </svg>
+                <div class="three-controls" style="bottom:15px;right:15px;top:auto;left:auto;">
+                  <div class="tc-btn-group">
+                    <button class="tc-btn" id="svg-zin" title="Zoom +">+</button>
+                    <button class="tc-btn" id="svg-zout" title="Zoom -">-</button>
+                    <button class="tc-btn" id="svg-reset" title="Reset">&#x2302;</button>
+                  </div>
+                </div>
+              </div>
+              <!-- Floating overlay: system chip (top-left) -->
+              <div class="sim-overlay-tl">
+                <div class="sys-chip">
+                  <div class="sys-chip-name">AHU-01 &bull; Mode Refroidissement</div>
+                  <div class="sys-chip-row"><span>Charge totale</span><span id="bal-qt-chip">&mdash;</span></div>
+                  <div class="sys-chip-row"><span>COP</span><span id="bal-cop-chip">&mdash;</span></div>
+                  <div class="sys-chip-row"><span>SHF</span><span id="bal-shf-chip">&mdash;</span></div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- TELEMETRY STRIP -->
+            <div class="telemetry-strip" id="telemetry-strip">
+              <div class="tel-cell"><div class="tel-val" id="bal-qs">&mdash;</div><div class="tel-label">Qs kW</div></div>
+              <div class="tel-cell"><div class="tel-val" id="bal-ql">&mdash;</div><div class="tel-label">Ql kW</div></div>
+              <div class="tel-cell"><div class="tel-val" id="bal-dh">&mdash;</div><div class="tel-label">&Delta;h</div></div>
+              <div class="tel-cell"><div class="tel-val" id="bal-shf">&mdash;</div><div class="tel-label">SHF</div></div>
+            </div>
+            <!-- Bottom row: sparkline timeline LEFT + psychro chart RIGHT -->
+            <div class="sim-bottom-row">
+              <div class="sim-timeline">
+                <div class="timeline-tabs" id="sim-tabs">
+                  <button class="timeline-tab active" data-tab="sparkline">Profil 24h</button>
+                  <button class="timeline-tab" data-tab="tendances">Tendances</button>
+                  <button class="timeline-tab" data-tab="energie">&Eacute;nergie</button>
+                </div>
+                <div class="timeline-content">
+                  <canvas id="sparkline" class="tab-canvas" style="width:100%;height:100%"></canvas>
+                  <canvas id="tendances" class="tab-canvas" style="width:100%;height:100%;display:none;"></canvas>
+                  <canvas id="energie" class="tab-canvas" style="width:100%;height:100%;display:none;"></canvas>
+                </div>
+              </div>
+              <div class="psychro-mini-panel" id="mini-psychro-panel">
+                <div class="mini-panel-title" style="font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;flex-shrink:0">Diagramme Psychrom&eacute;trique</div>
+                <svg id="mini-psychro" viewBox="0 0 400 180" style="width:100%;flex:1;min-height:0;display:block"></svg>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ════ PROJECTS ════ -->
+
+        <div id="view-projects" class="view" style="padding:0; overflow:hidden;">
+          <iframe src="environemental_advisor_agent.py/dashboard.html" style="width:100%; height:100%; border:none; display:block; margin:0; padding:0;"></iframe>
+        </div>
+
+        <!-- ════ PSYCHROMETRIC ════ -->
+
+        <div id="view-psychro" class="view">
+          <div class="psy-workspace">
+            <!-- LEFT TOOLBOX -->
+            <div class="psy-toolbox">
+              <div class="psy-tool-section">
+                <div class="psy-tool-title">Couches</div>
+                <div class="psy-layer-row" data-layer="rh" onclick="psyToggleLayer('rh',this)">
+                  <div class="psy-layer-check on" id="psy-chk-rh"></div>
+                  <span class="psy-layer-label" style="color:#0077b6">Lignes HR</span>
+                </div>
+                <div class="psy-layer-row" data-layer="enth" onclick="psyToggleLayer('enth',this)">
+                  <div class="psy-layer-check on" id="psy-chk-enth"></div>
+                  <span class="psy-layer-label" style="color:#e63946">Enthalpie</span>
+                </div>
+                <div class="psy-layer-row" data-layer="temp" onclick="psyToggleLayer('temp',this)">
+                  <div class="psy-layer-check on" id="psy-chk-temp"></div>
+                  <span class="psy-layer-label" style="color:#2a9d8f">Temp. humide</span>
+                </div>
+                <div class="psy-layer-row" data-layer="proc" onclick="psyToggleLayer('proc',this)">
+                  <div class="psy-layer-check on" id="psy-chk-proc"></div>
+                  <span class="psy-layer-label" style="color:#48cae4">Processus CTA</span>
+                </div>
+                <div class="psy-layer-row" data-layer="comfort" onclick="psyToggleLayer('comfort',this)">
+                  <div class="psy-layer-check on" id="psy-chk-comfort"></div>
+                  <span class="psy-layer-label" style="color:#2a9d8f">Zone Confort</span>
+                </div>
+                <div class="psy-layer-row" data-layer="grid" onclick="psyToggleLayer('grid',this)">
+                  <div class="psy-layer-check" id="psy-chk-grid"></div>
+                  <span class="psy-layer-label">Grille fine</span>
+                </div>
+              </div>
+              <div class="psy-tool-section">
+                <div class="psy-tool-title">Vue</div>
+                <button class="psy-tool-btn" onclick="psyResetView()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                  R&eacute;initialiser
+                </button>
+                <button class="psy-tool-btn" onclick="psyFitView()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                  Ajuster vue
+                </button>
+              </div>
+              <div class="psy-tool-section" style="flex:1">
+                <div class="psy-tool-title">Infos</div>
+                <div style="font-size:10px;color:var(--t3);line-height:1.6">
+                  <div>Molette &rarr; Zoom</div>
+                  <div>Glisser &rarr; Pan</div>
+                  <div>Dbl. clic &rarr; Reset</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- MAIN CHART AREA -->
+            <div class="psy-canvas-wrap">
+              <div class="psy-svg-container" id="psy-svg-container">
+                <svg id="psychro-svg" xmlns="http://www.w3.org/2000/svg">
+                  <g id="psy-transform-group"></g>
+                </svg>
+                <!-- Crosshair readout -->
+                <div class="psy-readout" id="psy-readout">T: -- &deg;C &nbsp;&nbsp; W: -- g/kg</div>
+                <!-- Zoom buttons -->
+                <div class="psy-zoom-controls">
+                  <button class="pzy-btn" onclick="psyZoomIn()" title="Zoom +">+</button>
+                  <button class="pzy-btn" onclick="psyZoomOut()" title="Zoom -">-</button>
+                  <button class="pzy-btn" onclick="psyResetView()" title="Reset">&#x2302;</button>
+                </div>
+              </div>
+              <!-- Bottom state dock -->
+              <div class="psy-state-dock">
+                <div class="psy-state-card active" id="psy-card-ext" style="--c:#f4a261" onclick="psyFocusState('ext')">
+                  <div class="psy-state-name" style="color:#f4a261">&#9679; Air Ext&eacute;rieur</div>
+                  <div class="psy-state-temp" style="color:#f4a261" id="psy-t-ext">--&deg;C</div>
+                  <div class="psy-state-meta" id="psy-m-ext">W: -- g/kg &nbsp; h: -- kJ/kg</div>
+                </div>
+                <div class="psy-state-card" id="psy-card-mix" onclick="psyFocusState('mix')">
+                  <div class="psy-state-name" style="color:#2a9d8f">&#9679; M&eacute;lange</div>
+                  <div class="psy-state-temp" style="color:#2a9d8f" id="psy-t-mix">--&deg;C</div>
+                  <div class="psy-state-meta" id="psy-m-mix">W: -- g/kg &nbsp; h: -- kJ/kg</div>
+                </div>
+                <div class="psy-state-card" id="psy-card-sup" onclick="psyFocusState('sup')">
+                  <div class="psy-state-name" style="color:#0077b6">&#9679; Soufflage</div>
+                  <div class="psy-state-temp" style="color:#0077b6" id="psy-t-sup">--&deg;C</div>
+                  <div class="psy-state-meta" id="psy-m-sup">W: -- g/kg &nbsp; h: -- kJ/kg</div>
+                </div>
+                <div class="psy-state-card" id="psy-card-zone" onclick="psyFocusState('zone')">
+                  <div class="psy-state-name" style="color:#e63946">&#9679; Zone</div>
+                  <div class="psy-state-temp" style="color:#e63946" id="psy-t-zone">--&deg;C</div>
+                  <div class="psy-state-meta" id="psy-m-zone">W: -- g/kg &nbsp; h: -- kJ/kg</div>
+                </div>
+                <div class="psy-state-card" style="min-width:180px;max-width:180px;border-left:1px solid rgba(139,148,158,0.08)">
+                  <div class="psy-state-name" style="color:var(--hum)">&Delta; Processus</div>
+                  <div style="font-family:var(--fh);font-size:15px;font-weight:800;color:var(--cool)" id="psy-dh">-- kJ/kg</div>
+                  <div class="psy-state-meta" id="psy-shf">SHF: -- &nbsp; Q: -- kW</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ════ CTA DESIGNER ════ -->
+
+        <div id="view-designer" class="view">
+
+          <div class="designer-wrap">
+
+            <div class="designer-main">
+
+              <div class="toolbar">
+
+                <span style="font-size:11.5px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-right:4px">Ajouter :</span>
+
+                <div class="comp-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M3 3l18 18M3 21 21 3" opacity=".5"/></svg>Filtre</div>
+
+                <div class="comp-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="8" height="12" rx="1"/><path d="M11 9h4a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-4"/><path d="M19 12h2"/></svg>Batterie Chaude</div>
+
+                <div class="comp-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="8" height="12" rx="1"/><path d="M11 9h4a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-4"/><path d="M19 12h2"/></svg>Batterie Froide</div>
+
+                <div class="comp-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M19.07 4.93 4.93 19.07"/></svg>Humidificateur</div>
+
+                <div class="comp-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="M8 12l4-4 4 4M12 8v8"/></svg>Ventilateur</div>
+
+                <div class="comp-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="8" width="9" height="8" rx="1"/><rect x="13" y="8" width="9" height="8" rx="1"/><path d="M11 12h2"/></svg>Échangeur</div>
+
+              </div>
+
+              <div class="designer-canvas">
+
+                <svg id="cta-svg" viewBox="0 0 860 340" width="100%" style="display:block"></svg>
+
+              </div>
+
+            </div>
+
+            <div class="designer-side">
+
+              <div class="comp-detail" id="comp-detail">
+
+                <div class="comp-detail-title" id="comp-title">Batterie Froide</div>
+
+                <div class="comp-detail-sub" id="comp-sub">Batterie eau glacée ● Détente directe</div>
+
+                <div class="param-row">
+
+                  <div class="param-label">Température d'entrée (°C)</div>
+
+                  <div class="param-ctrl"><input type="range" min="10" max="40" value="28" oninput="this.nextElementSibling.textContent=this.value+'°C'"><span class="param-ctrl-val">28°C</span></div>
+
+                </div>
+
+                <div class="param-row">
+
+                  <div class="param-label">Température de sortie (°C)</div>
+
+                  <div class="param-ctrl"><input type="range" min="6" max="25" value="13" oninput="this.nextElementSibling.textContent=this.value+'°C'"><span class="param-ctrl-val">13°C</span></div>
+
+                </div>
+
+                <div class="param-row">
+
+                  <div class="param-label">Débit d'air (m³/h)</div>
+
+                  <div class="param-ctrl"><input type="range" min="1000" max="20000" step="500" value="8000" oninput="this.nextElementSibling.textContent=(+this.value).toLocaleString('fr')"><span class="param-ctrl-val">8 000</span></div>
+
+                </div>
+
+                <div class="param-row">
+
+                  <div class="param-label">Efficacité (ε)</div>
+
+                  <div class="param-ctrl"><input type="range" min="50" max="99" value="82" oninput="this.nextElementSibling.textContent=this.value+'%'"><span class="param-ctrl-val">82%</span></div>
+
+                </div>
+
+                <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--brd)">
+
+                  <div style="font-size:11px;color:var(--t3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em">Résultats calculés</div>
+
+                  <div class="side-row"><span class="side-key">Puissance frigorifique</span><span class="side-val" style="color:var(--cool)">48.3 kW</span></div>
+
+                  <div class="side-row"><span class="side-key">ΔW (déshumid.)</span><span class="side-val">−6.8 g/kg</span></div>
+
+                  <div class="side-row"><span class="side-key">Perte de charge</span><span class="side-val">180 Pa</span></div>
+
+                </div>
+
+                <button class="btn" id="btn-delete-comp" style="width:100%;margin-top:12px;background:rgba(230,57,70,0.15);color:#e63946;border:1px solid rgba(230,57,70,0.4);cursor:pointer;padding:6px;border-radius:6px;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s" onmouseover="this.style.background='rgba(230,57,70,0.3)'" onmouseout="this.style.background='rgba(230,57,70,0.15)'">
+
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+
+                  Supprimer ce composant
+
+                </button>
+
+              </div>
+
+              <div class="side-card">
+
+                <div class="side-title">Simulation Rapide</div>
+
+                <div style="font-size:11px;color:var(--t2);margin-bottom:8px">Validez votre circuit avant simulation</div>
+
+                <div id="circuit-status" style="font-size:11px;margin-bottom:8px"><span style="color:var(--alert)">⚠️ Circuit incomplet</span></div>
+
+                <button class="btn btn-primary" style="width:100%;margin-bottom:6px" id="btn-sim-designer" disabled>
+
+                  <svg viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+
+                  Simuler &amp; Visualiser
+
+                </button>
+
+                <div id="designer-results" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--brd)">
+
+                  <div class="side-row"><span class="side-key">Débit total</span><span class="side-val" id="des-flow">—</span></div>
+
+                  <div class="side-row"><span class="side-key">ΔP totale</span><span class="side-val" id="des-dp">—</span></div>
+
+                  <div class="side-row"><span class="side-key">Puissance therm.</span><span class="side-val" id="des-power" style="color:var(--cool)">—</span></div>
+
+                  <div class="side-row"><span class="side-key">Puissance vent.</span><span class="side-val" id="des-wf" style="color:var(--hum)">—</span></div>
+
+                  <div class="side-row"><span class="side-key">COP estimé</span><span class="side-val" id="des-cop" style="color:var(--eco)">—</span></div>
+
+                  <div id="des-warnings" style="font-size:10px;margin-top:8px;line-height:1.6"></div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- ════ SETTINGS ════ -->
+
+        <div id="view-settings" class="view">
+
+          <div style="display: flex; gap: 40px; width: 100%; max-width: 1200px; justify-content: space-between; align-items: flex-start;">
+
+            <div style="flex: 1; max-width: 640px;">
+
+            <div style="font-family:var(--fh);font-size:17px;font-weight:700;margin-bottom:6px">Paramètres Globaux</div>
+
+            <div style="font-size:12.5px;color:var(--t2);margin-bottom:24px">Configuration de la plateforme CTA-SIM PRO</div>
+
+            <div class="card" style="margin-bottom:14px">
+
+              <div class="card-hd"><div class="card-title">Données météorologiques</div></div>
+
+              <div class="side-row"><span class="side-key">Source météo</span><span class="tag tag-eco">Fichier EPW actif</span></div>
+
+              <div class="side-row"><span class="side-key">Localisation</span><span class="side-val">Tunis, Tunisie (36°N, 10°E)</span></div>
+
+              <div class="side-row"><span class="side-key">Zone climatique</span><span class="side-val">Méditerranéenne ● Csa</span></div>
+
+              <div class="side-row"><span class="side-key">Altitude</span><span class="side-val">4 m ● P_atm 101.3 kPa</span></div>
+
+              <div class="side-row"><span class="side-key">T max été</span><span class="side-val">42°C (Juillet)</span></div>
+
+              <div class="side-row"><span class="side-key">T min hiver</span><span class="side-val">4°C (Janvier)</span></div>
+
+            </div>
+
+            <div class="card" style="margin-bottom:14px">
+
+              <div class="card-hd"><div class="card-title">Unités & Calculs</div></div>
+
+              <div class="side-row"><span class="side-key">Système d'unités</span><span class="side-val">SI (Métrique)</span></div>
+
+              <div class="side-row"><span class="side-key">Pression atmosphérique</span><span class="side-val">101 325 Pa</span></div>
+
+              <div class="side-row"><span class="side-key">Modèle enthalpie</span><span class="side-val">ASHRAE 2021 Fundamentals</span></div>
+
+              <div class="side-row"><span class="side-key">Pas de simulation</span><span class="side-val">1h (8760 points)</span></div>
+
+            </div>
+
+            <div class="card">
+
+              <div class="card-hd"><div class="card-title">À propos</div></div>
+
+              <div class="side-row"><span class="side-key">Application</span><span class="side-val">CTA-SIM PRO v3.0</span></div>
+
+              <div class="side-row"><span class="side-key">Auteur</span><span class="side-val" style="color:var(--cool)">TLILI SOULAYMEN</span></div>
+
+              <div class="side-row"><span class="side-key">Spécialité</span><span class="side-val" style="font-size:10px; max-width:200px; text-align:right;">SYSTÈME ÉNERGÉTIQUE ET TECHNOLOGIES PROPRES SETP</span></div>
+
+              <div class="side-row"><span class="side-key">Description</span><span class="side-val" style="font-size:11px;max-width:250px;text-align:right;white-space:normal">Plateforme de Simulation Avancée des Centrales de Traitement d'Air</span></div>
+
+            </div>
+
+          </div> <!-- /left-column -->
+
+          <!-- Right side Logo Area -->
+          <div style="flex: 1; display: flex; justify-content: center; align-items: flex-start; padding-top: 0; padding-left: 20px;">
+            <img src="ts-logo.png" alt="TS Logo" style="width: 100%; max-width: 550px; height: auto; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.5)); opacity: 0.95;">
+          </div>
+
+        </div> <!-- /flex container -->
+
+      </div><!-- /view-settings -->
+
+      </div><!-- /views -->
+
+    </div><!-- /main -->
+
+  </div><!-- /app -->
+
+  <script>
+
+    // ══════════════════════════════════════════════════
+
+    // NAVIGATION
+
+    // ══════════════════════════════════════════════════
+
+    const titles = { dashboard: 'Dashboard Énergétique', simulation: 'Simulation 3D ● CTA Dynamique', psychro: 'Diagramme Psychrométrique', designer: 'CTA Designer', projects: 'LOCAL DISTRIBUTOR', settings: 'Paramètres' };
+
+    
+
+    let activeNavTab = document.querySelector('.nav-tab.active');
+
+    const navCursor = document.getElementById('nav-cursor');
+
+    function updateCursor(tab) {
+
+      if (!tab || !navCursor) return;
+
+      navCursor.style.opacity = 1;
+
+      navCursor.style.width = tab.offsetWidth + 'px';
+
+      navCursor.style.left = tab.offsetLeft + 'px';
+
+    }
+
+    function switchView(v) {
+
+      document.querySelectorAll('.ni').forEach(x => x.classList.remove('active'));
+
+      const sidebarNi = document.querySelector(`.ni[data-view="${v}"]`);
+
+      if (sidebarNi) sidebarNi.classList.add('active');
+
+      document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
+
+      const viewEl = document.getElementById('view-' + v);
+
+      if (viewEl) viewEl.classList.add('active');
+
+      const tv = document.getElementById('tb-title');
+
+      if (tv) tv.textContent = titles[v] || '';
+
+      const navTabs = document.querySelectorAll('.nav-tab');
+
+      navTabs.forEach(t => t.classList.remove('active'));
+
+      const targetTab = document.querySelector(`.nav-tab[data-view="${v}"]`);
+
+      if (targetTab) {
+
+        targetTab.classList.add('active');
+
+        activeNavTab = targetTab;
+
+        updateCursor(targetTab);
+
+      }
+
+      if (v === 'dashboard') initDashboard();
+
+      if (v === 'psychro') setTimeout(drawPsychroChart, 50);
+
+      if (v === 'designer') setTimeout(drawCTADesigner, 50);
+
+      if (v === 'simulation') { setTimeout(() => { if (renderer3) { const w = document.getElementById('three-wrap'); renderer3.setSize(w.clientWidth, w.clientHeight); cam3.aspect = w.clientWidth / w.clientHeight; cam3.updateProjectionMatrix(); } }, 100); }
+
+    }
+
+    document.querySelectorAll('.ni').forEach(ni => {
+
+      ni.addEventListener('click', () => switchView(ni.dataset.view));
+
+    });
+
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+
+      tab.addEventListener('mouseenter', () => updateCursor(tab));
+
+      tab.addEventListener('click', () => switchView(tab.dataset.view));
+
+    });
+
+    const navHeader = document.getElementById('nav-header');
+
+    if (navHeader) {
+
+      navHeader.addEventListener('mouseleave', () => {
+
+        if (activeNavTab) updateCursor(activeNavTab);
+
+        else navCursor.style.opacity = 0;
+
+      });
+
+      // Initial positioning
+
+      setTimeout(() => { if (activeNavTab) updateCursor(activeNavTab); }, 100);
+
+    }
+
+    // ══════════════════════════════════════════════════
+
+    // PSYCHROMETRIC CHART ● Real SVG implementation
+
+    // ══════════════════════════════════════════════════
+
+    const psychroState = { rh: true, enth: true, proc: true, temp: true, grid: false };
+
+    function calcPsychroStandalone() {
+
+      const W_out = P.W(S.tdb, S.rh);
+
+      const W_room = P.W(S.troom, S.rhroom);
+
+      const f = S.pct / 100;
+
+      const T_mix = S.tdb * f + S.troom * (1 - f);
+
+      const W_mix = W_out * f + W_room * (1 - f);
+
+      const W_sup = P.W(S.tsup, 95);
+
+      return {
+
+          W_out, W_room, W_mix, W_sup,
+
+          T_mix, h_out: P.h(S.tdb, W_out),
+
+          h_mix: P.h(T_mix, W_mix),
+
+          h_sup: P.h(S.tsup, W_sup)
+
+      };
+
+    }
+
+    // ══════════════════════════════════════════════════
+    // PSYCHROMETRIC ANALYTICAL WORKSPACE ENGINE
+    // Full pan+zoom + adaptive rendering + state dock
+    // ══════════════════════════════════════════════════
+    let psyState = {
+      rh: true, enth: true, temp: true, proc: true, comfort: true, grid: false
+    };
+    // Pan/zoom state
+    let psyTransform = { x: 0, y: 0, k: 1 };
+    let psyDragging = false, psyLastX = 0, psyLastY = 0;
+    let psySVGW = 0, psySVGH = 0;
+    // Chart coordinate space (fixed logical space)
+    const PSY_MARGIN = { L: 50, R: 20, T: 20, B: 40 };
+    const PSY_TMIN = -5, PSY_TMAX = 50, PSY_WMAX = 28;
+
+    function psyXs(T) {
+      return PSY_MARGIN.L + (T - PSY_TMIN) / (PSY_TMAX - PSY_TMIN) * (psySVGW - PSY_MARGIN.L - PSY_MARGIN.R);
+    }
+    function psyYs(w) {
+      return PSY_MARGIN.T + (psySVGH - PSY_MARGIN.T - PSY_MARGIN.B) * (1 - Math.min(w, PSY_WMAX) / PSY_WMAX);
+    }
+    function psyInvX(px) {
+      const svgX = (px - psyTransform.x) / psyTransform.k;
+      return PSY_TMIN + (svgX - PSY_MARGIN.L) / (psySVGW - PSY_MARGIN.L - PSY_MARGIN.R) * (PSY_TMAX - PSY_TMIN);
+    }
+    function psyInvY(py) {
+      const svgY = (py - psyTransform.y) / psyTransform.k;
+      const frac = (svgY - PSY_MARGIN.T) / (psySVGH - PSY_MARGIN.T - PSY_MARGIN.B);
+      return (1 - frac) * PSY_WMAX;
+    }
+
+    function psyApplyTransform() {
+      const g = document.getElementById('psy-transform-group');
+      if (g) g.setAttribute('transform', `translate(${psyTransform.x},${psyTransform.y}) scale(${psyTransform.k})`);
+    }
+
+    function psyZoomAt(cx, cy, factor) {
+      const newK = Math.max(0.5, Math.min(12, psyTransform.k * factor));
+      const ratio = newK / psyTransform.k;
+      psyTransform.x = cx - ratio * (cx - psyTransform.x);
+      psyTransform.y = cy - ratio * (cy - psyTransform.y);
+      psyTransform.k = newK;
+      psyApplyTransform();
+    }
+    function psyZoomIn() { const c = document.getElementById('psy-svg-container'); const r = c.getBoundingClientRect(); psyZoomAt(r.width/2, r.height/2, 1.35); }
+    function psyZoomOut() { const c = document.getElementById('psy-svg-container'); const r = c.getBoundingClientRect(); psyZoomAt(r.width/2, r.height/2, 1/1.35); }
+    function psyResetView() { psyTransform = { x: 0, y: 0, k: 1 }; psyApplyTransform(); }
+    function psyFitView() {
+      const c = document.getElementById('psy-svg-container'); if (!c) return;
+      const r = c.getBoundingClientRect();
+      const scaleX = r.width / psySVGW, scaleY = r.height / psySVGH;
+      psyTransform = { x: 0, y: 0, k: Math.min(scaleX, scaleY) };
+      psyApplyTransform();
+    }
+    function psyFocusState(state) {
+      const map = { ext: [S.tdb, null], mix: [null, null], sup: [S.tsup, null], zone: [S.troom, null] };
+      drawPsychroChart();
+    }
+    function psyToggleLayer(layer, el) {
+      psyState[layer] = !psyState[layer];
+      const chk = document.getElementById('psy-chk-' + layer);
+      if (chk) chk.classList.toggle('on', psyState[layer]);
+      drawPsychroChart();
+    }
+
+    function initPsyInteraction() {
+      const container = document.getElementById('psy-svg-container');
+      const svg = document.getElementById('psychro-svg');
+      if (!container || !svg) return;
+
+      // Set SVG logical size from container
+      const setSize = () => {
+        psySVGW = container.clientWidth || 800;
+        psySVGH = container.clientHeight || 500;
+        svg.setAttribute('width', psySVGW);
+        svg.setAttribute('height', psySVGH);
+        svg.setAttribute('viewBox', `0 0 ${psySVGW} ${psySVGH}`);
+        drawPsychroChart();
+      };
+      setSize();
+      new ResizeObserver(setSize).observe(container);
+
+      // Mouse wheel zoom
+      container.addEventListener('wheel', e => {
+        e.preventDefault();
+        const rect = container.getBoundingClientRect();
+        const cx = e.clientX - rect.left, cy = e.clientY - rect.top;
+        const factor = e.deltaY < 0 ? 1.12 : 1/1.12;
+        psyZoomAt(cx, cy, factor);
+      }, { passive: false });
+
+      // Pan drag
+      container.addEventListener('mousedown', e => {
+        if (e.button !== 0) return;
+        psyDragging = true; psyLastX = e.clientX; psyLastY = e.clientY;
+        container.style.cursor = 'grabbing';
+      });
+      window.addEventListener('mousemove', e => {
+        if (!psyDragging) {
+          // Crosshair readout
+          const rect = container.getBoundingClientRect();
+          const T = psyInvX(e.clientX - rect.left);
+          const W = psyInvY(e.clientY - rect.top);
+          const ro = document.getElementById('psy-readout');
+          if (ro && T >= PSY_TMIN && T <= PSY_TMAX && W >= 0 && W <= PSY_WMAX) {
+            ro.innerHTML = `T: ${T.toFixed(1)}&deg;C &nbsp;&nbsp; W: ${W.toFixed(2)} g/kg`;
+          }
+          return;
+        }
+        psyTransform.x += e.clientX - psyLastX;
+        psyTransform.y += e.clientY - psyLastY;
+        psyLastX = e.clientX; psyLastY = e.clientY;
+        psyApplyTransform();
+      });
+      window.addEventListener('mouseup', () => { psyDragging = false; container.style.cursor = 'grab'; });
+
+      // Double click reset
+      container.addEventListener('dblclick', psyResetView);
+
+      // Touch support (pinch zoom)
+      let lastDist = 0;
+      container.addEventListener('touchstart', e => {
+        if (e.touches.length === 2) {
+          const dx = e.touches[0].clientX - e.touches[1].clientX;
+          const dy = e.touches[0].clientY - e.touches[1].clientY;
+          lastDist = Math.sqrt(dx*dx + dy*dy);
+        }
+      });
+      container.addEventListener('touchmove', e => {
+        e.preventDefault();
+        if (e.touches.length === 2) {
+          const dx = e.touches[0].clientX - e.touches[1].clientX;
+          const dy = e.touches[0].clientY - e.touches[1].clientY;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          const rect = container.getBoundingClientRect();
+          const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+          const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+          psyZoomAt(cx, cy, dist / lastDist);
+          lastDist = dist;
+        }
+      }, { passive: false });
+    }
+
+    function drawPsychroChart() {
+      const svg = document.getElementById('psychro-svg'); if (!svg) return;
+      const g = document.getElementById('psy-transform-group'); if (!g) return;
+      if (psySVGW === 0 || psySVGH === 0) {
+          initPsyInteraction();
+      }
+      if (psySVGW === 0) return; // Still hidden
+
+      const r = calcPsychroStandalone();
+      const W = psySVGW, H = psySVGH;
+      const { L, R, T, B } = PSY_MARGIN;
+      const pw = W - L - R, ph = H - T - B;
+
+      let out = '';
+
+      // Background
+      out += `<rect width="${W}" height="${H}" fill="#080d18"/>`;
+
+      // Fine grid
+      if (psyState.grid) {
+        for (let t = PSY_TMIN; t <= PSY_TMAX; t += 1)
+          out += `<line x1="${psyXs(t)}" y1="${T}" x2="${psyXs(t)}" y2="${T+ph}" stroke="rgba(255,255,255,.025)" stroke-width=".4"/>`;
+        for (let w = 0; w <= PSY_WMAX; w += 1)
+          out += `<line x1="${L}" y1="${psyYs(w)}" x2="${L+pw}" y2="${psyYs(w)}" stroke="rgba(255,255,255,.025)" stroke-width=".4"/>`;
+      }
+
+      // Major grid
+      for (let t = 0; t <= 50; t += 10)
+        out += `<line x1="${psyXs(t)}" y1="${T}" x2="${psyXs(t)}" y2="${T+ph}" stroke="rgba(255,255,255,.04)" stroke-width=".5"/>`;
+      for (let w = 0; w <= PSY_WMAX; w += 4)
+        out += `<line x1="${L}" y1="${psyYs(w)}" x2="${L+pw}" y2="${psyYs(w)}" stroke="rgba(255,255,255,.04)" stroke-width=".5"/>`;
+
+      // Enthalpy lines
+      if (psyState.enth) {
+        [10,20,30,40,50,60,70,80,90,100].forEach(h => {
+          let pts = [];
+          for (let t = PSY_TMIN; t <= PSY_TMAX; t += 0.5) {
+            const w_ = (h - 1.006*t) / (2501 + 1.86*t);
+            if (w_ >= 0 && w_*1000 <= PSY_WMAX) pts.push(`${psyXs(t).toFixed(1)},${psyYs(w_*1000).toFixed(1)}`);
+          }
+          if (pts.length > 1) out += `<polyline points="${pts.join(' ')}" fill="none" stroke="rgba(230,57,70,0.13)" stroke-width=".7"/>
+          <text x="${psyXs(PSY_TMAX)-8}" y="${psyYs(Math.max(0,(h-1.006*PSY_TMAX)/(2501+1.86*PSY_TMAX)*1000))-2}" fill="rgba(230,57,70,.35)" font-size="7" font-family="DM Sans">${h}</text>`;
+        });
+      }
+
+      // RH lines
+      if (psyState.rh) {
+        [10,20,30,40,50,60,70,80,90,100].forEach(rh => {
+          let pts = [];
+          for (let t = PSY_TMIN; t <= PSY_TMAX; t += 0.3) {
+            const w_ = P.W(t, rh) * 1000;
+            if (w_ >= 0 && w_ <= PSY_WMAX) pts.push(`${psyXs(t).toFixed(1)},${psyYs(w_).toFixed(1)}`);
+          }
+          if (pts.length > 1) {
+            const isHundred = rh === 100;
+            out += `<polyline points="${pts.join(' ')}" fill="none" stroke="${isHundred ? '#0077b6' : 'rgba(0,119,182,0.28)'}" stroke-width="${isHundred ? 1.6 : 0.7}"/>`;
+            if (rh % 20 === 0) {
+              const wl = P.W(25, rh) * 1000;
+              if (wl <= PSY_WMAX) out += `<text x="${psyXs(25)+3}" y="${psyYs(wl)-2}" fill="rgba(0,119,182,.55)" font-size="8" font-family="DM Sans">${rh}%</text>`;
+            }
+          }
+        });
+        // Saturation area fill
+        let satPts = [];
+        for (let t = PSY_TMIN; t <= PSY_TMAX; t += 0.5) {
+          const w_ = P.W(t, 100) * 1000;
+          if (w_ >= 0 && w_ <= PSY_WMAX) satPts.push(`${psyXs(t).toFixed(1)},${psyYs(w_).toFixed(1)}`);
+        }
+        if (satPts.length > 1)
+          out += `<polygon points="${satPts.join(' ')} ${psyXs(PSY_TMAX)},${T} ${L},${T}" fill="rgba(0,119,182,0.04)"/>`;
+      }
+
+      // Wet-bulb lines
+      if (psyState.temp) {
+        [5,10,15,20,25,30,35].forEach(Twb => {
+          const Wsat = P.W(Twb, 100) * 1000;
+          let pts = [`${psyXs(Twb).toFixed(1)},${psyYs(Wsat).toFixed(1)}`];
+          for (let t = Twb+0.5; t <= PSY_TMAX; t += 0.5) {
+            const w_ = Wsat - 0.00066 * 101.325 * (t - Twb) * 1000;
+            if (w_ >= 0 && w_ <= PSY_WMAX) pts.push(`${psyXs(t).toFixed(1)},${psyYs(w_).toFixed(1)}`);
+          }
+          if (pts.length > 1) {
+            out += `<polyline points="${pts.join(' ')}" fill="none" stroke="rgba(42,157,143,0.22)" stroke-width=".6"/>`;
+            out += `<text x="${psyXs(Twb)-4}" y="${psyYs(Wsat)+3}" fill="rgba(42,157,143,.5)" font-size="7.5" font-family="DM Sans" text-anchor="middle">${Twb}</text>`;
+          }
+        });
+      }
+
+      // ASHRAE Comfort Zone overlay
+      if (psyState.comfort) {
+        const cz = [[20,4],[28,4],[28,12],[20,12]].map(([t,w]) => `${psyXs(t).toFixed(1)},${psyYs(w).toFixed(1)}`).join(' ');
+        out += `<polygon points="${cz}" fill="rgba(42,157,143,0.06)" stroke="rgba(42,157,143,0.3)" stroke-width="1" stroke-dasharray="5 3"/>`;
+        out += `<text x="${psyXs(24)}" y="${psyYs(8)-2}" fill="rgba(42,157,143,.45)" font-size="8.5" font-family="Syne" font-weight="700" text-anchor="middle">ASHRAE Confort</text>`;
+      }
+
+      // Process line with animation
+      if (psyState.proc) {
+        const Wog = r.W_out*1000, Wmg = r.W_mix*1000, Wsg = r.W_sup*1000, Wrg = r.W_room*1000;
+        const To = S.tdb, Tm = r.T_mix, Ts = S.tsup, Tr = S.troom;
+        // Arrowhead marker
+        out += `<defs><marker id="arr-ext" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#f4a261"/></marker>
+        <marker id="arr-coil" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#0077b6"/></marker>
+        <marker id="arr-zone" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#e63946"/></marker></defs>`;
+        // Lines
+        out += `<line x1="${psyXs(To)}" y1="${psyYs(Wog)}" x2="${psyXs(Tm)}" y2="${psyYs(Wmg)}" stroke="#f4a261" stroke-width="2" stroke-dasharray="6 3" marker-end="url(#arr-ext)"/>`;
+        out += `<line x1="${psyXs(Tm)}" y1="${psyYs(Wmg)}" x2="${psyXs(Ts)}" y2="${psyYs(Wsg)}" stroke="#0077b6" stroke-width="2.5" marker-end="url(#arr-coil)"/>`;
+        out += `<line x1="${psyXs(Ts)}" y1="${psyYs(Wsg)}" x2="${psyXs(Tr)}" y2="${psyYs(Wrg)}" stroke="#e63946" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arr-zone)"/>`;
+        // State points with glow
+        const pts4 = [
+          {T:To,W:Wog,c:'#f4a261',n:'EXT',h:r.h_out},
+          {T:Tm,W:Wmg,c:'#2a9d8f',n:'MIX',h:r.h_mix||0},
+          {T:Ts,W:Wsg,c:'#0077b6',n:'SUP',h:r.h_sup},
+          {T:Tr,W:Wrg,c:'#e63946',n:'ZON',h:P.h(Tr,r.W_room)}
+        ];
+        pts4.forEach(({T,W,c,n,h}) => {
+          const cx = psyXs(T), cy = psyYs(W);
+          // Glow ring
+          out += `<circle cx="${cx}" cy="${cy}" r="10" fill="${c}" opacity=".12"/>`;
+          out += `<circle cx="${cx}" cy="${cy}" r="5.5" fill="${c}" stroke="#080d18" stroke-width="1.5"/>`;
+          // Label bubble
+          const lx = cx + 10, ly = cy - 8;
+          out += `<rect x="${lx}" y="${ly-13}" width="52" height="30" rx="4" fill="#0e1420" opacity=".92" stroke="${c}" stroke-width=".8"/>`;
+          out += `<text x="${lx+4}" y="${ly-2}" fill="${c}" font-size="9.5" font-family="Syne" font-weight="800">${n}</text>`;
+          out += `<text x="${lx+4}" y="${ly+10}" fill="#8b949e" font-size="8" font-family="DM Sans">${T.toFixed(1)}\u00b0C ${W.toFixed(1)}g</text>`;
+        });
+      }
+
+      // Axes
+      out += `<line x1="${L}" y1="${T}" x2="${L}" y2="${T+ph}" stroke="#3d444d" stroke-width="1"/>`;
+      out += `<line x1="${L}" y1="${T+ph}" x2="${L+pw}" y2="${T+ph}" stroke="#3d444d" stroke-width="1"/>`;
+      for (let t = 0; t <= 50; t += 5) {
+        out += `<line x1="${psyXs(t)}" y1="${T+ph}" x2="${psyXs(t)}" y2="${T+ph+4}" stroke="#484f58" stroke-width=".8"/>`;
+        out += `<text x="${psyXs(t)}" y="${T+ph+14}" text-anchor="middle" fill="#8b949e" font-size="9" font-family="DM Sans">${t}\u00b0C</text>`;
+      }
+      for (let w = 0; w <= PSY_WMAX; w += 4) {
+        out += `<line x1="${L-4}" y1="${psyYs(w)}" x2="${L}" y2="${psyYs(w)}" stroke="#484f58" stroke-width=".8"/>`;
+        out += `<text x="${L-6}" y="${psyYs(w)+3}" text-anchor="end" fill="#8b949e" font-size="9" font-family="DM Sans">${w}</text>`;
+      }
+      // Axis labels
+      out += `<text x="${L+pw/2}" y="${H-4}" text-anchor="middle" fill="#484f58" font-size="9.5" font-family="DM Sans">Temp\u00e9rature s\u00e8che (\u00b0C)</text>`;
+      out += `<text transform="rotate(-90)" x="${-(T+ph/2)}" y="13" text-anchor="middle" fill="#484f58" font-size="9.5" font-family="DM Sans">Ratio d'humidit\u00e9 W (g/kg)</text>`;
+
+      g.innerHTML = out;
+
+      // Update state dock cards
+      const fmt1 = v => (isFinite(v) ? v.toFixed(1) : '--');
+      const fmt2 = v => (isFinite(v) ? v.toFixed(2) : '--');
+      const setCard = (id, tId, mId, T, W, h) => {
+        const t = document.getElementById(tId); if (t) t.textContent = fmt1(T) + '\u00b0C';
+        const m = document.getElementById(mId); if (m) m.innerHTML = `W: ${fmt2(W)} g/kg &nbsp; h: ${fmt1(h)} kJ/kg`;
+      };
+      setCard('ext', 'psy-t-ext', 'psy-m-ext', S.tdb, r.W_out*1000, r.h_out);
+      setCard('mix', 'psy-t-mix', 'psy-m-mix', r.T_mix, r.W_mix*1000, r.h_mix||0);
+      setCard('sup', 'psy-t-sup', 'psy-m-sup', S.tsup, r.W_sup*1000, r.h_sup);
+      setCard('zone', 'psy-t-zone', 'psy-m-zone', S.troom, r.W_room*1000, P.h(S.troom, r.W_room));
+      const dhEl = document.getElementById('psy-dh');
+      if (dhEl) dhEl.textContent = fmt1(r.dh) + ' kJ/kg';
+      const shfEl = document.getElementById('psy-shf');
+      if (shfEl) shfEl.innerHTML = `SHF: ${fmt2(r.SHF)} &nbsp; Q: ${fmt1(r.Qt)} kW`;
+    }
+
+    // Backward compat: calcPsychroStandalone (used by old code)
+    function calcPsychroStandalone() {
+      return calc();
+    }
+
+
+    // Wire .pctrl toggle buttons
+
+    document.querySelectorAll('.pctrl').forEach(btn => {
+
+      btn.addEventListener('click', () => {
+
+        const ctrl = btn.dataset.ctrl;
+
+        psychroState[ctrl] = !psychroState[ctrl];
+
+        btn.classList.toggle('on', psychroState[ctrl]);
+
+        drawPsychroChart();
+
+      });
+
+    });
+
+    // ══════════════════════════════════════════════════
+
+    // CTA DESIGNER ● Interactive SVG
+
+    // ══════════════════════════════════════════════════
+
+    const designerComponents = [
+
+      { type: 'filter',   x: 80,  label: 'FILTRE',       color: '#2a9d8f', w: 60, h: 100 },
+
+      { type: 'mix',      x: 165, label: 'MIX',          color: '#f4a261', w: 50, h: 100 },
+
+      { type: 'coil',     x: 240, label: 'BATT. FROIDE', color: '#0077b6', w: 80, h: 100 },
+
+      { type: 'fan',      x: 345, label: 'VENTILATEUR',  color: '#48cae4', w: 70, h: 100 },
+
+      { type: 'supply',   x: 440, label: 'SOUFFLAGE',    color: '#e6edf3', w: 60, h: 100 },
+
+    ];
+
+    let selectedComp = 2; // default: cooling coil
+
+    // Drag state
+
+    let draggingCompIdx = null;
+
+    let dragStartX = 0;
+
+    let dragStartCompX = 0;
+
+    window.addEventListener('mousemove', e => {
+
+      if (draggingCompIdx !== null) {
+
+        const svg = document.getElementById('cta-svg');
+
+        const rect = svg.getBoundingClientRect();
+
+        const scale = 860 / rect.width;
+
+        const dx = (e.clientX - dragStartX) * scale;
+
+        designerComponents[draggingCompIdx].x = Math.max(10, Math.min(850 - designerComponents[draggingCompIdx].w, dragStartCompX + dx));
+
+        drawCTADesigner();
+
+      }
+
+    });
+
+    window.addEventListener('mouseup', () => {
+
+      draggingCompIdx = null;
+
+    });
+
+    const compIcons = {
+
+      filter: `<circle cx="12" cy="12" r="3" stroke="currentColor" fill="none"/><path d="M3 3l18 18M3 21 21 3" stroke="currentColor" opacity=".5" fill="none"/>`,
+
+      heat: `<rect x="3" y="6" width="8" height="12" rx="1" stroke="currentColor" fill="none"/><path d="M11 9h4a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-4M19 12h2" stroke="currentColor" fill="none"/>`,
+
+      coil: `<rect x="3" y="6" width="8" height="12" rx="1" stroke="currentColor" fill="none"/><path d="M11 9h4a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-4M19 12h2" stroke="currentColor" fill="none"/>`,
+
+      hum: `<path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M19.07 4.93 4.93 19.07" stroke="currentColor" fill="none"/>`,
+
+      fan: `<circle cx="12" cy="12" r="8" stroke="currentColor" fill="none"/><path d="M8 12l4-4 4 4M12 8v8" stroke="currentColor" fill="none"/>`,
+
+      exch: `<rect x="2" y="8" width="9" height="8" rx="1" stroke="currentColor" fill="none"/><rect x="13" y="8" width="9" height="8" rx="1" stroke="currentColor" fill="none"/><path d="M11 12h2" stroke="currentColor" fill="none"/>`,
+
+      supply: `<polygon points="5 5 19 12 5 19 5 5" stroke="currentColor" fill="none"/>`,
+
+      mix: `<path d="M4 12h16M12 4l8 8-8 8" stroke="currentColor" fill="none"/>`
+
+    };
+
+    function drawCTADesigner() {
+
+      const svg = document.getElementById('cta-svg'); if (!svg) return;
+
+      const W = 860, H = 340, cy = 170, ductY1 = cy - 25, ductY2 = cy + 25;
+
+      let out = `<rect width="${W}" height="${H}" fill="#0d1117" rx="10"/>`;
+
+      // Duct backbone
+
+      out += `<rect x="60" y="${ductY1}" width="740" height="50" fill="#161b22" stroke="#21262d" stroke-width="1.5" rx="6"/>`;
+
+      // Return duct arrow
+
+      out += `<text x="720" y="${cy - 32}" fill="#484f58" font-size="10" font-family="DM Sans">† AIR REPRIS</text>`;
+
+      out += `<text x="520" y="${cy + 45}" fill="#484f58" font-size="10" font-family="DM Sans">AIR SOUFFLÉ †’</text>`;
+
+      designerComponents.forEach((c, i) => {
+
+        const isSelected = i === selectedComp;
+
+        const bx = c.x, by = cy - c.h / 2;
+
+        const alpha = isSelected ? 1 : 0.7;
+
+        out += `<g class="dc-comp" data-idx="${i}" style="cursor:grab">`;
+
+        out += `<rect x="${bx}" y="${by}" width="${c.w}" height="${c.h}" rx="8" fill="${c.color}22" stroke="${c.color}" stroke-width="${isSelected ? 2.5 : 1.5}" opacity="${alpha}"/>`;
+
+        
+
+        // Icon rendering
+
+        const icon = compIcons[c.type] || '';
+
+        out += `<svg x="${bx + c.w/2 - 12}" y="${cy - 30}" width="24" height="24" viewBox="0 0 24 24" color="${c.color}" stroke-width="2">${icon}</svg>`;
+
+        
+
+        if (isSelected) out += `<rect x="${bx - 3}" y="${by - 3}" width="${c.w + 6}" height="${c.h + 6}" rx="10" fill="none" stroke="${c.color}" stroke-width="1" stroke-dasharray="4 3" opacity="0.5"/>`;
+
+        out += `<text x="${bx + c.w / 2}" y="${cy + 15}" text-anchor="middle" fill="${c.color}" font-size="8" font-family="Syne" font-weight="700">${c.label}</text>`;
+
+        out += `</g>`;
+
+      });
+
+      svg.innerHTML = out;
+
+      // Bind clicks and mousedown for drag
+
+      svg.querySelectorAll('.dc-comp').forEach(g => {
+
+        g.addEventListener('mousedown', e => {
+
+          selectedComp = parseInt(g.dataset.idx);
+
+          draggingCompIdx = selectedComp;
+
+          dragStartX = e.clientX;
+
+          dragStartCompX = designerComponents[selectedComp].x;
+
+          updateDesignerDetail();
+
+          drawCTADesigner();
+
+        });
+
+      });
+
+      
+
+      validateCircuit();
+
+    }
+
+    function validateCircuit() {
+
+      const hasInlet = designerComponents.some(c => c.type === 'filter' || c.type === 'mix');
+
+      const hasCoil = designerComponents.some(c => c.type === 'coil' || c.type === 'heat');
+
+      const hasFan = designerComponents.some(c => c.type === 'fan');
+
+      const hasOutlet = designerComponents.some(c => c.type === 'supply');
+
+      
+
+      const status = $('circuit-status');
+
+      const btn = $('btn-sim-designer');
+
+      if (!status || !btn) return false;
+
+      
+
+      if (hasInlet && hasCoil && hasFan && hasOutlet) {
+
+        status.innerHTML = '<span style="color:var(--eco)">✓ Circuit valide</span>';
+
+        btn.disabled = false;
+
+        return true;
+
+      } else {
+
+        const missing = [];
+
+        if (!hasInlet) missing.push('entrée air');
+
+        if (!hasCoil) missing.push('batterie');
+
+        if (!hasFan) missing.push('ventilateur');
+
+        if (!hasOutlet) missing.push('sortie');
+
+        status.innerHTML = `<span style="color:var(--alert)">⚠️ Manque: ${missing.join(', ')}</span>`;
+
+        btn.disabled = true;
+
+        $('designer-results').style.display = 'none';
+
+        return false;
+
+      }
+
+    }
+
+    
+
+    // Wire up designer simulation button ● uses calcAdaptive + navigates to sim
+
+    const btnSimDesigner = $('btn-sim-designer');
+
+    if (btnSimDesigner) {
+
+      btnSimDesigner.addEventListener('click', () => {
+
+        const v = validator.validate(designerComponents);
+
+        if (!v.valid) { alert('Circuit invalide:\n• ' + v.errors.join('\n• ')); return; }
+
+        const r = calcAdaptive(designerComponents, S);
+
+        // Show extended results in designer panel
+
+        $('des-flow').textContent = r.flow.toLocaleString('fr', {maximumFractionDigits:0}) + ' m³/h';
+
+        $('des-dp').textContent = r.dp_total + ' Pa';
+
+        $('des-power').textContent = r.Qt.toFixed(1) + ' kW';
+
+        const copEl = $('des-cop'); if (copEl) copEl.textContent = r.COP.toFixed(2);
+
+        const wfEl  = $('des-wf');  if (wfEl)  wfEl.textContent  = r.Wf.toFixed(2) + ' kW';
+
+        const warnEl = $('des-warnings');
+
+        if (warnEl) {
+
+          const warns = v.warnings || [];
+
+          warnEl.innerHTML = warns.length ? warns.map(w => `<span style="color:var(--hum)">⚠️ ${w}</span>`).join('<br>') : '<span style="color:var(--eco)">✓ Aucun avertissement</span>';
+
+        }
+
+        $('designer-results').style.display = 'block';
+
+        // Auto-navigate to simulation and start it
+
+        setTimeout(() => router.runSimulationFromDesigner(), 600);
+
+      });
+
+    }
+
+    function updateDesignerDetail() {
+
+      const c = designerComponents[selectedComp];
+
+      const titles = { filter: 'Filtre à air', mix: 'Caisson de mélange', coil: 'Batterie Froide', heat: 'Batterie Chaude', hum: 'Humidificateur', fan: 'Ventilateur', supply: 'Gaine de soufflage', exch: 'Échangeur' };
+
+      const subs = { filter: 'Filtration G4/F7 ● Perte de charge nominale: 80 Pa', mix: 'Mélange air neuf/air repris', coil: 'Batterie eau glacée ● Détente directe', heat: 'Batterie eau chaude', hum: 'Humidificateur à vapeur', fan: 'Ventilateur centrifuge ● vitesse variable', supply: 'Réseau de distribution', exch: 'Récupérateur de chaleur à plaques' };
+
+      const el = document.getElementById('comp-title'); if (el) el.textContent = titles[c.type] || c.label;
+
+      const sub = document.getElementById('comp-sub'); if (sub) sub.textContent = subs[c.type] || '';
+
+    }
+
+    // Wire designer toolbar pills
+
+    document.querySelectorAll('.comp-pill').forEach((pill, i) => {
+
+      pill.addEventListener('click', () => {
+
+        const types = ['filter', 'heat', 'coil', 'hum', 'fan', 'exch'];
+
+        const labels = ['FILTRE', 'BATT. CHAUDE', 'BATT. FROIDE', 'HUMIDIFICATEUR', 'VENTILATEUR', 'ÉCHANGEUR'];
+
+        const colors = ['#2a9d8f', '#e63946', '#0077b6', '#e9c46a', '#48cae4', '#6c757d'];
+
+        
+
+        let maxX = 80;
+
+        designerComponents.forEach(c => { if(c.x > maxX) maxX = c.x; });
+
+        const newX = Math.min(750, maxX + 80);
+
+        const newComp = { type: types[i] || 'filter', x: newX, label: labels[i] || 'COMP', color: colors[i] || '#8b949e', w: 65, h: 100 };
+
+        designerComponents.push(newComp);
+
+        selectedComp = designerComponents.length - 1;
+
+        updateDesignerDetail();
+
+        drawCTADesigner();
+
+        pill.style.borderColor = 'var(--cool)';
+
+        setTimeout(() => pill.style.borderColor = '', 400);
+
+      });
+
+    });
+
+    // Delete component button
+
+    const btnDel = document.getElementById('btn-delete-comp');
+
+    if (btnDel) {
+
+      btnDel.addEventListener('click', () => {
+
+        if (designerComponents.length <= 1) { alert('Le circuit doit contenir au moins un composant.'); return; }
+
+        designerComponents.splice(selectedComp, 1);
+
+        selectedComp = Math.max(0, selectedComp - 1);
+
+        updateDesignerDetail();
+
+        drawCTADesigner();
+
+        // Re-validate circuit
+
+        if (typeof validateCircuit === 'function') validateCircuit();
+
+      });
+
+    }
+
+    // ══════════════════════════════════════════════════
+
+    // CIRCUIT SCHEMA ● Source unique de vérité physique
+
+    // ══════════════════════════════════════════════════
+
+    const CIRCUIT_SCHEMA = {
+
+      components: {
+
+        filter:  { name: 'Filtre',          color: '#2a9d8f', dp_nominal: 80,  category: 'inlet',    maxCount: 3 },
+
+        heat:    { name: 'Batterie Chaude', color: '#e63946', dp_nominal: 100, category: 'coil',     power_max: 150 },
+
+        coil:    { name: 'Batterie Froide', color: '#0077b6', dp_nominal: 150, category: 'coil',     power_max: 200 },
+
+        humid:   { name: 'Humidificateur', color: '#e9c46a', dp_nominal: 30,  category: 'treatment' },
+
+        fan:     { name: 'Ventilateur',    color: '#48cae4', dp_nominal: 0,   category: 'mover',    maxCount: 4, efficiency: 0.75 },
+
+        exch:    { name: 'Échangeur',      color: '#6c757d', dp_nominal: 150, category: 'recovery', effectiveness: 0.72 },
+
+        mix:     { name: 'Mélangeur',      color: '#f4a261', dp_nominal: 20,  category: 'inlet' },
+
+        supply:  { name: 'Soufflage',      color: '#e6edf3', dp_nominal: 0,   category: 'outlet',   minCount: 1 }
+
+      },
+
+      rules: { required: ['inlet', 'mover', 'outlet'], maxComponents: 12 }
+
+    };
+
+    // ══════════════════════════════════════════════════
+
+    // CIRCUIT VALIDATOR
+
+    // ══════════════════════════════════════════════════
+
+    class CircuitValidator {
+
+      validate(components) {
+
+        const errors = [], warnings = [];
+
+        const cats = [...new Set(components.map(c => (CIRCUIT_SCHEMA.components[c.type] || {}).category).filter(Boolean))];
+
+        const types = components.map(c => c.type);
+
+        CIRCUIT_SCHEMA.rules.required.forEach(req => {
+
+          if (!cats.includes(req)) {
+
+            const names = { inlet: 'Entrée air (Filtre ou Mélangeur)', mover: 'Ventilateur', outlet: 'Soufflage' };
+
+            errors.push(names[req] || req);
+
+          }
+
+        });
+
+        const fanCount = types.filter(t => t === 'fan').length;
+
+        if (fanCount > 4) errors.push('Max 4 ventilateurs');
+
+        // Forbidden sequences
+
+        for (let i = 0; i < types.length - 1; i++) {
+
+          if ((types[i] === 'coil' && types[i+1] === 'coil') || (types[i] === 'heat' && types[i+1] === 'heat'))
+
+            warnings.push(`Séquence déconseillée: ${types[i]} †’ ${types[i+1]}`);
+
+        }
+
+        if (components.length > 12) errors.push('Max 12 composants');
+
+        return {
+
+          valid: errors.length === 0, errors, warnings, fanCount,
+
+          hasCooling: types.includes('coil'),
+
+          hasHeating: types.includes('heat'),
+
+          hasRecovery: types.includes('exch'),
+
+          hasMix:     types.includes('mix')
+
+        };
+
+      }
+
+    }
+
+    const validator = new CircuitValidator();
+
+    // ══════════════════════════════════════════════════
+
+    // ADAPTIVE CALC ENGINE
+
+    // ══════════════════════════════════════════════════
+
+    function calcAdaptive(components, op) {
+
+      const v = validator.validate(components);
+
+      if (!v.valid) return { error: true, messages: v.errors, Qs:0,Ql:0,Qt:0,COP:0,Wf:0,flow:0,dp_total:0,mDot:0,hasFan:false };
+
+      // Pressure drop
+
+      let dp_total = 0;
+
+      components.forEach(c => { dp_total += (CIRCUIT_SCHEMA.components[c.type] || {}).dp_nominal || 0; });
+
+      // Flow ● multi-fan boost
+
+      const fans = components.filter(c => c.type === 'fan');
+
+      const fanCount = fans.length;
+
+      const actualFlow = op.flow * (fanCount > 1 ? 1 + (fanCount - 1) * 0.15 : 1);
+
+      // Air mixing with recovery
+
+      let T_mix = op.tdb, W_mix;
+
+      const W_out  = P.W(op.tdb,   op.rh);
+
+      const W_room = P.W(op.troom, op.rhroom);
+
+      if (v.hasRecovery) {
+
+        const eff = CIRCUIT_SCHEMA.components.exch.effectiveness;
+
+        T_mix = op.tdb - eff * (op.tdb - op.troom) * 0.5;
+
+      }
+
+      if (v.hasMix) {
+
+        const f = op.pct / 100;
+
+        T_mix = op.tdb * f + op.troom * (1 - f);
+
+        W_mix = W_out * f + W_room * (1 - f);
+
+      } else {
+
+        W_mix = P.W(T_mix, op.rh);
+
+      }
+
+      // Supply conditions
+
+      let T_sup = T_mix, W_sup = W_mix;
+
+      if (v.hasCooling) { T_sup = op.tsup; W_sup = Math.min(W_mix, P.W(T_sup, 95)); }
+
+      if (v.hasHeating && !v.hasCooling) { T_sup = Math.max(T_sup, op.tsup); }
+
+      // Energy
+
+      const rho = 1.2, mDot = actualFlow * rho / 3600;
+
+      const cp = 1.006, hfg = 2501;
+
+      const Qs = mDot * cp * (T_mix - T_sup);
+
+      const Ql = mDot * hfg * Math.max(0, W_mix - W_sup);
+
+      const Qt = Math.abs(Qs) + Math.abs(Ql);
+
+      const fanEff = CIRCUIT_SCHEMA.components.fan.efficiency;
+
+      const Wf = fanCount * (actualFlow * dp_total) / (3600 * fanEff * 1000);
+
+      const COP = Qt > 0 ? Qt / (Wf + Qt * 0.22) : 0;
+
+      return {
+
+        error: false, Qs, Ql, Qt, COP, Wf,
+
+        flow: actualFlow, dp_total,
+
+        T_mix, W_mix, T_sup, W_sup, mDot, hasFan: true,
+
+        validation: v, fanCount,
+
+        hasCooling: v.hasCooling, hasHeating: v.hasHeating, hasRecovery: v.hasRecovery
+
+      };
+
+    }
+
+    // ══════════════════════════════════════════════════
+
+    // DYNAMIC 2D FLOW SVG GENERATOR
+
+    // ══════════════════════════════════════════════════
+
+    function generateFlowSVG(components) {
+
+      const svg = document.getElementById('flow-svg');
+
+      if (!svg) return;
+
+      const W = 640, H = 370;
+
+      const comps = components || designerComponents;
+
+      const n = comps.length;
+
+      // Layout: building on right, CTA components flow left-to-right in a casing
+
+      const bldgX = 480, bldgW = 110, bldgH = 110, bldgY = H/2 - bldgH/2 + 10;
+
+      const casingPad = 22;
+
+      const compAreaW = bldgX - 80;
+
+      const compW = Math.min(55, (compAreaW - casingPad * 2) / Math.max(n, 1) - 10);
+
+      const compH = 70;
+
+      const cy = H / 2 + 5;
+
+      const startX = 50 + casingPad;
+
+      const spacing = (compAreaW - casingPad * 2 - compW) / Math.max(n - 1, 1);
+
+      // Component SVG renderers
+
+      const COMP_LABELS = { filter:'FILTRE', mix:'MIX', coil:'BATT.FROIDE', heat:'BATT.CHAUDE', fan:'VENTILATEUR', supply:'SOUFFLAGE', exch:'ÉCHANGEUR', humid:'HUMIDIF.' };
+
+      const COMP_COLORS = { filter:'#2a9d8f', mix:'#f4a261', coil:'#0077b6', heat:'#e63946', fan:'#48cae4', supply:'#e6edf3', exch:'#6c757d', humid:'#e9c46a' };
+
+      function compSVG(type, cx, cy, w, h) {
+
+        const col = COMP_COLORS[type] || '#8b949e';
+
+        const lbl = COMP_LABELS[type] || type.toUpperCase();
+
+        let s = '';
+
+        if (type === 'fan') {
+
+          const r = Math.min(w, h) / 2 - 2;
+
+          s += `<circle cx="${cx+w/2}" cy="${cy}" r="${r}" fill="#161b22" stroke="${col}" stroke-width="1.5"/>`;
+
+          s += `<circle cx="${cx+w/2}" cy="${cy}" r="3" fill="${col}"/>`;
+
+          for (let b = 0; b < 6; b++) {
+
+            const a = b * Math.PI / 3;
+
+            const x1 = cx+w/2 + Math.cos(a) * 4, y1 = cy + Math.sin(a) * 4;
+
+            const x2 = cx+w/2 + Math.cos(a) * (r-2), y2 = cy + Math.sin(a) * (r-2);
+
+            s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="1.2" opacity="0.7"/>`;
+
+          }
+
+        } else if (type === 'coil' || type === 'heat') {
+
+          s += `<rect x="${cx}" y="${cy-h/2}" width="${w}" height="${h}" rx="5" fill="${col}15" stroke="${col}" stroke-width="1.5"/>`;
+
+          for (let i = 0; i < 5; i++) {
+
+            const ly = cy - h/2 + 8 + i * (h-16)/4;
+
+            s += `<line x1="${cx+3}" y1="${ly}" x2="${cx+w-3}" y2="${ly}" stroke="${col}" stroke-width="0.7" opacity="0.5"/>`;
+
+          }
+
+        } else if (type === 'filter') {
+
+          s += `<rect x="${cx}" y="${cy-h/2}" width="${w}" height="${h}" rx="5" fill="${col}15" stroke="${col}" stroke-width="1.2"/>`;
+
+          for (let i = 0; i < 3; i++) {
+
+            const lx = cx + 6 + i * (w-12)/2;
+
+            s += `<line x1="${lx}" y1="${cy-h/2+5}" x2="${lx}" y2="${cy+h/2-5}" stroke="${col}" stroke-width="0.7" opacity="0.6"/>`;
+
+          }
+
+        } else {
+
+          s += `<rect x="${cx}" y="${cy-h/2}" width="${w}" height="${h}" rx="6" fill="${col}12" stroke="${col}" stroke-width="1.5"/>`;
+
+        }
+
+        s += `<text x="${cx+w/2}" y="${cy+h/2+12}" text-anchor="middle" fill="${col}" font-size="7" font-family="DM Sans" font-weight="600">${lbl}</text>`;
+
+        return s;
+
+      }
+
+      // Build SVG
+
+      let out = `<defs><filter id="glow"><feGaussianBlur stdDeviation="2"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`;
+
+      // Building
+
+      out += `<rect x="${bldgX}" y="${bldgY}" width="${bldgW}" height="${bldgH}" rx="12" fill="#161b22" stroke="#21262d" stroke-width="2"/>`;
+
+      out += `<rect x="${bldgX}" y="${bldgY}" width="${bldgW}" height="4" rx="2" fill="#0077b6" opacity="0.4"/>`;
+
+      out += `<text x="${bldgX+bldgW/2}" y="${bldgY+bldgH/2-2}" text-anchor="middle" fill="#8b949e" font-size="10" font-family="Syne" font-weight="700">BÂTIMENT</text>`;
+
+      out += `<text x="${bldgX+bldgW/2}" y="${bldgY+bldgH/2+12}" text-anchor="middle" fill="#484f58" font-size="8" font-family="DM Sans">Zone Occupée</text>`;
+
+      // CTA casing around components
+
+      const casingX = 50, casingW = bldgX - 70;
+
+      const casingY = cy - compH/2 - 30, casingH = compH + 70;
+
+      out += `<rect x="${casingX}" y="${casingY}" width="${casingW}" height="${casingH}" rx="12" fill="#1c2128" stroke="#484f58" stroke-width="1.5"/>`;
+
+      out += `<text x="${casingX + casingW/2}" y="${casingY - 6}" text-anchor="middle" fill="#8b949e" font-size="9" font-family="Syne" font-weight="700" letter-spacing=".05em">CENTRALE DE TRAITEMENT D'AIR</text>`;
+
+      // Components
+
+      const compPositions = [];
+
+      comps.forEach((c, i) => {
+
+        const cx = startX + i * spacing;
+
+        compPositions.push({ x: cx, w: compW });
+
+        out += compSVG(c.type, cx, cy, compW, compH);
+
+      });
+
+      // Duct: supply line from last component to building
+
+      if (compPositions.length > 0) {
+
+        const last = compPositions[compPositions.length - 1];
+
+        const supX = last.x + last.w;
+
+        const supY = cy;
+
+        // Supply duct
+
+        out += `<line x1="${supX}" y1="${supY}" x2="${bldgX}" y2="${bldgY + bldgH/2}" stroke="#484f58" stroke-width="2.5" stroke-dasharray="5 3"/>`;
+
+        out += `<text x="${(supX + bldgX)/2}" y="${supY + 16}" text-anchor="middle" fill="#484f58" font-size="8" font-family="DM Sans">AIR SOUFFLÉ †’</text>`;
+
+        // Return duct
+
+        out += `<line x1="${bldgX}" y1="${bldgY + 15}" x2="${compPositions[0].x + compPositions[0].w/2}" y2="${casingY + 8}" stroke="#484f58" stroke-width="2" stroke-dasharray="4 3"/>`;
+
+        out += `<text x="${(bldgX + compPositions[0].x)/2}" y="${casingY - 14}" text-anchor="middle" fill="#484f58" font-size="8" font-family="DM Sans">† AIR REPRIS</text>`;
+
+      }
+
+      // Outdoor air inlet
+
+      out += `<line x1="${casingX}" y1="${cy}" x2="${casingX - 25}" y2="${cy}" stroke="#f4a261" stroke-width="1.5" stroke-dasharray="3 2"/>`;
+
+      out += `<text x="${casingX - 28}" y="${cy + 4}" text-anchor="end" fill="#f4a261" font-size="8" font-family="DM Sans" font-weight="500">AIR EXT.</text>`;
+
+      // Duct connections between components
+
+      for (let i = 0; i < compPositions.length - 1; i++) {
+
+        const a = compPositions[i], b = compPositions[i + 1];
+
+        out += `<line x1="${a.x + a.w}" y1="${cy}" x2="${b.x}" y2="${cy}" stroke="#484f58" stroke-width="2" stroke-dasharray="4 2"/>`;
+
+        out += `<polygon points="${b.x-6},${cy-3} ${b.x},${cy} ${b.x-6},${cy+3}" fill="#484f58"/>`;
+
+      }
+
+      // Animated particles on supply path (only when sim is running)
+
+      if (compPositions.length > 0) {
+
+        const last = compPositions[compPositions.length - 1];
+
+        const supPath = `M ${last.x + last.w} ${cy} L ${bldgX} ${bldgY + bldgH/2}`;
+
+        const retPath = `M ${bldgX} ${bldgY + 15} L ${compPositions[0].x + compPositions[0].w/2} ${casingY + 8}`;
+
+        out += `<path id="p-supply-dyn" d="${supPath}" fill="none"/>`;
+
+        out += `<path id="p-return-dyn" d="${retPath}" fill="none"/>`;
+
+        for (let p = 0; p < 3; p++) {
+
+          out += `<circle r="4" fill="#48cae4" opacity="0.85"><animateMotion dur="2s" begin="${p*0.6}s" repeatCount="indefinite"><mpath href="#p-supply-dyn"/></animateMotion></circle>`;
+
+          out += `<circle r="3.5" fill="#e63946" opacity="0.75"><animateMotion dur="2.5s" begin="${p*0.8}s" repeatCount="indefinite"><mpath href="#p-return-dyn"/></animateMotion></circle>`;
+
+        }
+
+      }
+
+      svg.innerHTML = out;
+
+      // Pause animations if sim not running
+
+      if (!isSimRunning && svg.pauseAnimations) svg.pauseAnimations();
+
+    }
+
+    // ══════════════════════════════════════════════════
+
+    // APP ROUTER ● Designer ↔ Simulation Sync
+
+    // ══════════════════════════════════════════════════
+
+    class AppRouter {
+
+      constructor() { this.circuitDirty = false; }
+
+      navigateTo(view) {
+
+        document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
+
+        document.querySelector(`.ni[data-view="${view}"]`)?.classList.add('active');
+
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+
+        document.getElementById(`view-${view}`)?.classList.add('active');
+
+        const navTabs = document.querySelectorAll('.nav-tab');
+
+        navTabs.forEach(t => t.classList.remove('active'));
+
+        const targetTab = document.querySelector(`.nav-tab[data-view="${view}"]`);
+
+        if (targetTab) { targetTab.classList.add('active'); activeNavTab = targetTab; updateCursor(targetTab); }
+
+        const tv = document.getElementById('tb-title');
+
+        if (tv) tv.textContent = titles[view] || '';
+
+        if (view === 'simulation') this._syncSimulation();
+
+        if (view === 'dashboard')  initDashboard();
+
+        if (view === 'psychro') {
+        setTimeout(() => { initPsyInteraction(); drawPsychroChart(); }, 60);
+      }
+
+        if (view === 'designer')   setTimeout(drawCTADesigner, 50);
+
+        if (view === 'simulation') {
+
+          setTimeout(() => { if (renderer3) { const w = document.getElementById('three-wrap'); renderer3.setSize(w.clientWidth, w.clientHeight); cam3.aspect = w.clientWidth / w.clientHeight; cam3.updateProjectionMatrix(); } }, 100);
+
+        }
+
+      }
+
+      _syncSimulation() {
+
+        // Rebuild 2D flow SVG from current designer components
+
+        generateFlowSVG(designerComponents);
+
+        // Push particle speed based on fan count
+
+        const fanCount = designerComponents.filter(c => c.type === 'fan').length;
+
+        Object.values(psys).forEach(ps => { if (ps) ps.speed = 0.0025 * (1 + (fanCount - 1) * 0.3); });
+
+        // Update latestFlow from adaptive engine
+
+        const r = calcAdaptive(designerComponents, S);
+
+        if (!r.error) { window.latestFlow = r.flow; updateUI(r); updateMiniPsychro(r); }
+
+        this.circuitDirty = false;
+
+      }
+
+      runSimulationFromDesigner() {
+
+        const v = validator.validate(designerComponents);
+
+        if (!v.valid) { alert('Circuit invalide:\n• ' + v.errors.join('\n• ')); return; }
+
+        this.circuitDirty = false;
+
+        this.navigateTo('simulation');
+
+        if (!isSimRunning) runSimulation();
+
+      }
+
+    }
+
+    const router = new AppRouter();
+
+    // ══════════════════════════════════════════════════
+
+    // PSYCHROMETRIC ENGINE
+
+    // ══════════════════════════════════════════════════
+
+    const P = {
+
+      atm: 101.325,
+
+      psat(T) { return 0.6108 * Math.exp(17.27 * T / (T + 237.3)); },
+
+      W(T, RH) { const pv = (RH / 100) * this.psat(T); return 0.622 * pv / (this.atm - pv); },
+
+      h(T, W) { return 1.006 * T + W * (2501 + 1.86 * T); },
+
+      RH(T, W) { const pv = W * this.atm / (0.622 + W); return Math.min(100, (pv / this.psat(T)) * 100); },
+
+      dp(T, RH) { const a = 17.27, b = 237.3, alpha = Math.log(RH / 100) + a * T / (b + T); return b * alpha / (a - alpha); },
+
+      wb(T, RH) {
+
+        const Wt = this.W(T, RH); let Tw = T - 5;
+
+        for (let i = 0; i < 40; i++) {
+
+          const Ws = this.W(Tw, 100); const Wc = Ws - 6.6e-4 * (1 + 0.00115 * Tw) * (T - Tw);
+
+          if (Math.abs(Wc - Wt) < 1e-5) break;
+
+          Tw += (Wt - Wc) * 80; Tw = Math.max(-20, Math.min(T, Tw));
+
+        }
+
+        return Tw;
+
+      }
+
+    };
+
+    // ══════════════════════════════════════════════════
+
+    // BACKEND API
+
+    // ══════════════════════════════════════════════════
+
+    const API = 'http://127.0.0.1:8000';
+
+    let backendOnline = false;
+
+    async function checkBackend() {
+
+      try {
+
+        const resp = await fetch(`${API}/health`, { signal: AbortSignal.timeout(1500) });
+
+        backendOnline = resp.ok;
+
+      } catch { backendOnline = false; }
+
+      const badge = document.getElementById('api-badge');
+
+      if (badge) {
+
+        badge.textContent = backendOnline ? '🟢 API Connected' : '🔴 Offline (Local)';
+
+        badge.style.color = backendOnline ? 'var(--eco)' : 'var(--heat)';
+
+      }
+
+    }
+
+    async function apiSimulate() {
+
+      if (!backendOnline) return null;
+
+      try {
+
+        const cS = getDesignerConstraints(S);
+
+        const body = {
+
+          T_ext: cS.effectiveTdb, RH_ext: cS.rh, pct_fresh: cS.pct,
+
+          Q_vol: cS.flow, T_sup: cS.tsup, T_zone: cS.troom, RH_zone: cS.rhroom,
+
+          fan_eta: 0.70, dp_fan: cS.dp_fan
+
+        };
+
+        const resp = await fetch(`${API}/api/simulate`, {
+
+          method: 'POST',
+
+          headers: { 'Content-Type': 'application/json' },
+
+          body: JSON.stringify(body),
+
+          signal: AbortSignal.timeout(3000)
+
+        });
+
+        if (!resp.ok) return null;
+
+        return await resp.json();
+
+      } catch { backendOnline = false; return null; }
+
+    }
+
+    async function apiStep() {
+
+      if (!backendOnline) {
+
+        const r = calc();
+
+        updateUI(r);
+
+        updateMiniPsychro(r);
+
+        return;
+
+      }
+
+      try {
+
+        const cS = getDesignerConstraints(S);
+
+        const body = {
+
+          T_zone: cS.troom, RH_zone: cS.rhroom,
+
+          T_ext: cS.effectiveTdb, RH_ext: cS.rh, pct_fresh: cS.pct,
+
+          Q_vol: cS.flow, T_sup: cS.tsup,
+
+          fan_eta: 0.70, dp_fan: cS.dp_fan,
+
+          Q_load_sensible: 35000, Q_load_latent: 15000,
+
+          dt: 0.5
+
+        };
+
+        const resp = await fetch(`${API}/api/step`, {
+
+          method: 'POST',
+
+          headers: { 'Content-Type': 'application/json' },
+
+          body: JSON.stringify(body),
+
+          signal: AbortSignal.timeout(3000)
+
+        });
+
+        if (resp.ok) {
+
+           const data = await resp.json();
+
+           S.troom = data.new_zone.T;
+
+           S.rhroom = data.new_zone.RH;
+
+           
+
+           const elTz = $('s-troom'); if (elTz) elTz.value = S.troom;
+
+           const elRHz = $('s-rhroom'); if (elRHz) elRHz.value = S.rhroom;
+
+           
+
+           const r = apiToR(data.simulation);
+
+           updateUI(r);
+
+           updateMiniPsychro(r);
+
+           updateSparklineFromBackend();
+
+        }
+
+      } catch (e) { backendOnline = false; }
+
+    }
+
+    async function apiDaily() {
+
+      if (!backendOnline) return null;
+
+      try {
+
+        const body = {
+
+          T_ext: S.tdb, RH_ext: S.rh, pct_fresh: S.pct,
+
+          Q_vol: S.flow, T_sup: S.tsup, T_zone: S.troom, RH_zone: S.rhroom
+
+        };
+
+        const resp = await fetch(`${API}/api/daily`, {
+
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+
+          body: JSON.stringify(body), signal: AbortSignal.timeout(3000)
+
+        });
+
+        return resp.ok ? await resp.json() : null;
+
+      } catch { return null; }
+
+    }
+
+    async function apiAnnual() {
+
+      if (!backendOnline) return null;
+
+      try {
+
+        const body = {
+
+          T_avg: 18.5, T_amp: 11.5, RH_avg: 65.0,
+
+          T_sup: S.tsup, T_zone: S.troom, RH_zone: S.rhroom,
+
+          Q_vol: S.flow, pct_fresh: S.pct
+
+        };
+
+        const resp = await fetch(`${API}/api/annual`, {
+
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+
+          body: JSON.stringify(body), signal: AbortSignal.timeout(8000)
+
+        });
+
+        return resp.ok ? await resp.json() : null;
+
+      } catch { return null; }
+
+    }
+
+    // Convert API response to the local r format expected by updateUI
+
+    function apiToR(api) {
+
+      const st = api.states;
+
+      const en = api.energy;
+
+      const fl = api.flow;
+
+      return {
+
+        Qs: en.Q_sensible, Ql: en.Q_latent, Qt: en.Q_total,
+
+        Wf: en.W_fan, COP: en.COP, dh: en.delta_h,
+
+        SHF: en.SHF,
+
+        T_mix: st.mixed.T,
+
+        W_mix: st.mixed.W_kg || (st.mixed.W / 1000),
+
+        W_out: st.outdoor.W_kg || (st.outdoor.W / 1000),
+
+        W_room: st.zone.W_kg || (st.zone.W / 1000),
+
+        W_sup: st.supply.W_kg || (st.supply.W / 1000),
+
+        h_mix: st.mixed.h, h_sup: st.supply.h, h_out: st.outdoor.h,
+
+        mDot: fl.mdot,
+
+        ach: fl.Q_vol / 1300,
+
+        Twb: st.outdoor.Tw,
+
+        comfort: api.comfort.category,
+
+      };
+
+    }
+
+    // ══════════════════════════════════════════════════
+
+    // STATE
+
+    // ══════════════════════════════════════════════════
+
+    const S = { tdb: 34, rh: 50, pct: 40, flow: 8000, tsup: 13, troom: 24, rhroom: 50 };
+
+    const VOL = 1300; // m³
+
+    function getDesignerConstraints(baseS) {
+
+      const hasCoolingCoil = designerComponents.some(c => c.type === 'coil');
+
+      const hasHeatingCoil = designerComponents.some(c => c.type === 'heat');
+
+      const hasFan = designerComponents.some(c => c.type === 'fan');
+
+      const numFilters = designerComponents.filter(c => c.type === 'filter').length;
+
+      const hasExchanger = designerComponents.some(c => c.type === 'exch');
+
+      
+
+      let outS = { ...baseS };
+
+      
+
+      // Fan constraint
+
+      if (!hasFan) outS.flow = 0;
+
+      
+
+      // Filter constraints
+
+      outS.dp_fan = 200 + (numFilters * 80) + (hasCoolingCoil ? 150 : 0) + (hasHeatingCoil ? 100 : 0) + (hasExchanger ? 150 : 0);
+
+      
+
+      // Heat Exchanger constraint
+
+      let effectiveTdb = outS.tdb;
+
+      if (hasExchanger && outS.flow > 0) {
+
+        effectiveTdb = outS.tdb - 0.5 * (outS.tdb - outS.troom); // 50% sensible effectiveness
+
+      }
+
+      outS.effectiveTdb = effectiveTdb;
+
+      
+
+      // Coil constraints
+
+      const f = outS.pct / 100;
+
+      const T_mix = effectiveTdb * f + outS.troom * (1 - f);
+
+      
+
+      if (!hasCoolingCoil && outS.tsup < T_mix) {
+
+        outS.tsup = T_mix; // Can't cool below T_mix
+
+      }
+
+      if (!hasHeatingCoil && outS.tsup > T_mix) {
+
+        outS.tsup = T_mix; // Can't heat above T_mix
+
+      }
+
+      
+
+      outS.T_mix = T_mix;
+
+      
+
+      // Update visual indicator in UI
+
+      updateDesignerConstraintVisuals(!hasCoolingCoil, !hasHeatingCoil, !hasFan, outS.dp_fan);
+
+      
+
+      return outS;
+
+    }
+
+    function updateDesignerConstraintVisuals(noCooling, noHeating, noFan, dp) {
+
+      let str = `Pression Vent: ${dp}Pa`;
+
+      if (noCooling) str += ` | Refroidissement Off`;
+
+      if (noHeating) str += ` | Chauffage Off`;
+
+      if (noFan) str += ` | Ventilateur Off`;
+
+      
+
+      let el = document.getElementById('designer-constraints-msg');
+
+      if (!el) {
+
+        const wrap = document.querySelector('.ctrl-actions');
+
+        if (wrap) {
+
+          el = document.createElement('div');
+
+          el.id = 'designer-constraints-msg';
+
+          el.style.fontSize = '9px';
+
+          el.style.color = 'var(--alert)';
+
+          el.style.fontFamily = 'var(--fm)';
+
+          el.style.fontWeight = '700';
+
+          el.style.width = '100%';
+
+          el.style.textAlign = 'center';
+
+          el.style.marginTop = '4px';
+
+          wrap.parentNode.insertBefore(el, wrap.nextSibling);
+
+        }
+
+      }
+
+      if (el) el.textContent = str;
+
+    }
+
+    function calc() {
+
+      const cS = getDesignerConstraints(S);
+
+      const hasFan = designerComponents.some(c => c.type === 'fan');
+
+      
+
+      if (!hasFan) {
+
+        return {
+
+            Qs: 0, Ql: 0, Qt: 0, Wf: 0, COP: 0, dh: 0,
+
+            T_mix: cS.T_mix, W_mix: 0, W_out: 0, W_room: 0, W_sup: 0,
+
+            h_mix: 0, h_sup: 0, h_out: 0, ach: 0, SHF: 0, Twb: 0, mDot: 0,
+
+            hasFan: false
+
+        };
+
+      }
+
+      
+
+      const { tdb, rh, pct, flow, tsup, troom, rhroom, effectiveTdb, T_mix } = cS;
+
+      
+
+      const W_out = P.W(effectiveTdb, rh);
+
+      const W_room = P.W(troom, rhroom);
+
+      const h_out = P.h(effectiveTdb, W_out);
+
+      const h_room = P.h(troom, W_room);
+
+      const f = pct / 100;
+
+      const W_mix = W_out * f + W_room * (1 - f);
+
+      const h_mix = h_out * f + h_room * (1 - f);
+
+      const W_sup = P.W(tsup, 95);
+
+      const h_sup = P.h(tsup, W_sup);
+
+      const rho = 1.2, mDot = flow * rho / 3600;
+
+      const cp = 1.006, hfg = 2501;
+
+      const Qs = mDot * cp * (T_mix - tsup);
+
+      const Ql = mDot * hfg * Math.max(0, W_mix - W_sup);
+
+      const Qt = Qs + Ql;
+
+      const dP = cS.dp_fan, eta = 0.75;
+
+      const Wf = (flow * dP) / (3600 * eta * 1000);
+
+      const COP = Qt > 0 ? Qt / (Wf + Qt * 0.22) : 0;
+
+      const dh = h_mix - h_sup;
+
+      const ach = flow / VOL;
+
+      const SHF = Qt > 0 ? Qs / Qt : 1;
+
+      const Twb = P.wb(tdb, rh);
+
+      return { Qs, Ql, Qt, Wf, COP, dh, T_mix, W_mix, W_out, W_room, W_sup, h_mix, h_sup, h_out, ach, SHF, Twb, mDot, hasFan: true };
+
+    }
+
+    // Master recalc: prefer backend, fallback to local
+
+    async function recalc() {
+
+      const api = await apiSimulate();
+
+      const r = api ? apiToR(api) : calc();
+
+      updateUI(r);
+
+      updateMiniPsychro(r);
+
+      updateSparklineFromBackend();
+
+      return r;
+
+    }
+
+    async function updateSparklineFromBackend() {
+
+      const data = await apiDaily();
+
+      if (data) {
+
+        const canvas = $('sparkline'); if (!canvas) return;
+
+        if (sparkChart) {
+
+          sparkChart.data.labels = data.hours.map(h => h + 'h');
+
+          sparkChart.data.datasets[0].data = data.T_zone;
+
+          sparkChart.data.datasets[1].data = data.hours.map(() => data.comfort_hi);
+
+          sparkChart.data.datasets[2].data = data.hours.map(() => data.comfort_lo);
+
+          sparkChart.update('none');
+
+        } else {
+
+          updateSparkline(); // init chart then update
+
+        }
+
+      } else {
+
+        updateSparkline();
+
+      }
+
+    }
+
+    function $(id) { return document.getElementById(id); }
+
+    const fmt = (v, d = 1) => isFinite(v) ? v.toFixed(d) : '—';
+
+    
+    // --- TIMELINE TABS LOGIC ---
+    const simTabs = document.querySelectorAll('#sim-tabs .timeline-tab');
+    const tabCanvases = document.querySelectorAll('.timeline-content .tab-canvas');
+    simTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        simTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const target = tab.dataset.tab;
+        tabCanvases.forEach(c => c.style.display = (c.id === target) ? 'block' : 'none');
+        // resize active chart
+        const chart = Chart.getChart(document.getElementById(target));
+        if(chart) chart.resize();
+      });
+    });
+
+    // --- STOCHASTIC ENERGY CHART ---
+    let energyChart = null;
+    let energyData = [];
+    let energyLabels = [];
+    const ENERGY_MAX_POINTS = 50;
+    
+    
+    let tendancesChart = null;
+    let tendLabels = [];
+    let tendDataEff = [];
+    let tendDataLoad = [];
+    const TEND_MAX_POINTS = 30;
+
+    function initTendancesChart() {
+      const ctx = document.getElementById('tendances');
+      if (!ctx) return;
+      
+      for(let i=0; i<TEND_MAX_POINTS; i++) {
+         tendLabels.push('');
+         tendDataEff.push(null);
+         tendDataLoad.push(null);
+      }
+      
+      const canvasCtx = ctx.getContext('2d');
+      const gradEff = canvasCtx.createLinearGradient(0, 0, 0, 400);
+      gradEff.addColorStop(0, 'rgba(42,157,143,0.5)');
+      gradEff.addColorStop(1, 'rgba(42,157,143,0.0)');
+      
+      const gradLoad = canvasCtx.createLinearGradient(0, 0, 0, 400);
+      gradLoad.addColorStop(0, 'rgba(0,119,182,0.8)');
+      gradLoad.addColorStop(1, 'rgba(0,119,182,0.1)');
+
+      tendancesChart = new Chart(ctx, {
+        data: {
+          labels: tendLabels,
+          datasets: [
+            {
+              type: 'line',
+              label: 'Efficacité Globale (%)',
+              data: tendDataEff,
+              borderColor: '#2a9d8f',
+              backgroundColor: gradEff,
+              fill: true,
+              tension: 0.4,
+              borderWidth: 2,
+              pointBackgroundColor: '#2a9d8f',
+              pointBorderColor: '#121826',
+              pointBorderWidth: 2,
+              pointRadius: 0,
+              pointHoverRadius: 6,
+              yAxisID: 'y1'
+            },
+            {
+              type: 'bar',
+              label: 'Charge Thermique (kW)',
+              data: tendDataLoad,
+              backgroundColor: gradLoad,
+              borderRadius: 4,
+              borderWidth: 1,
+              borderColor: 'rgba(0,119,182,1)',
+              barThickness: 'flex',
+              categoryPercentage: 0.8,
+              barPercentage: 0.9,
+              yAxisID: 'y'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 0 },
+          interaction: {
+            mode: 'index',
+            intersect: false,
+          },
+          plugins: {
+            legend: { 
+              display: true, 
+              labels: { color: '#8b949e', font: {family: 'DM Sans', size: 11}, usePointStyle: true }
+            },
+            tooltip: {
+              backgroundColor: 'rgba(14,20,32,0.95)',
+              titleColor: '#fff',
+              bodyColor: '#a9b1d6',
+              borderColor: 'rgba(255,255,255,0.08)',
+              borderWidth: 1,
+              padding: 12,
+              boxPadding: 6,
+              usePointStyle: true,
+              titleFont: {family: 'DM Sans', size: 13, weight: 'bold'},
+              bodyFont: {family: 'DM Sans', size: 12}
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false, drawBorder: false },
+              ticks: { display: false }
+            },
+            y: {
+              type: 'linear',
+              display: true,
+              position: 'left',
+              grid: { color: 'rgba(255,255,255,0.04)', borderDash: [4, 4], drawBorder: false },
+              ticks: { color: '#8b949e', font: {family: 'DM Sans', size: 10} },
+              title: { display: true, text: 'Charge (kW)', color: '#6e7681', font: {family: 'DM Sans', size: 10} },
+              min: 0, max: 120
+            },
+            y1: {
+              type: 'linear',
+              display: true,
+              position: 'right',
+              grid: { drawOnChartArea: false },
+              ticks: { color: '#2a9d8f', font: {family: 'DM Sans', size: 10} },
+              title: { display: true, text: 'Efficacité (%)', color: '#2a9d8f', font: {family: 'DM Sans', size: 10} },
+              min: 50, max: 100
+            }
+          }
+        }
+      });
+    }
+
+    function tickTendancesChart(r) {
+      if (!tendancesChart || !isSimRunning) return;
+      
+      const power = r.Qt || 0;
+      const baseEff = 95 - (power / 120) * 20;
+      const eff = Math.min(100, Math.max(50, baseEff + (Math.random() - 0.5) * 3));
+      
+      const noisePwr = (Math.random() - 0.5) * 4;
+      const load = Math.max(0, power + noisePwr);
+
+      tendDataEff.push(eff);
+      tendDataEff.shift();
+      
+      tendDataLoad.push(load);
+      tendDataLoad.shift();
+
+      tendancesChart.update('none');
+    }
+
+    function initEnergyChart() {
+      const ctx = document.getElementById('energie');
+      if (!ctx) return;
+      
+      for(let i=0; i<ENERGY_MAX_POINTS; i++) {
+         energyLabels.push(i);
+         energyData.push(null);
+      }
+
+      energyChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: energyLabels,
+          datasets: [
+            {
+              label: 'Consommation',
+              data: energyData,
+              borderColor: 'rgba(42,157,143,1)',
+              backgroundColor: 'rgba(42,157,143,0.1)',
+              fill: true,
+              tension: 0.2,
+              borderWidth: 2,
+              pointRadius: 0
+            },
+            {
+              label: 'Seuil (mean + 2σ)',
+              data: Array(ENERGY_MAX_POINTS).fill(45), // arbitrary threshold
+              borderColor: 'rgba(230,57,70,0.8)',
+              borderDash: [5, 5],
+              borderWidth: 1.5,
+              pointRadius: 0,
+              fill: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 0 }, 
+          plugins: {
+            legend: { display: true, labels: { color: '#8b949e', font:{family:'DM Sans', size:10} } },
+            tooltip: { enabled: false }
+          },
+          scales: {
+            x: { display: false },
+            y: { 
+              grid: { color: 'rgba(255,255,255,0.04)' },
+              ticks: { color: '#8b949e' },
+              min: 0, max: 120
+            }
+          }
+        }
+      });
+    }
+
+    function tickEnergyChart(power) {
+      if (!energyChart || !isSimRunning) return;
+      // Stochastic behavior: Add noise to actual power
+      const noise = (Math.random() - 0.5) * 5; 
+      let val = power + noise;
+      if (val < 0) val = 0;
+
+      energyData.push(val);
+      energyData.shift();
+
+      energyChart.update('none');
+    }
+
+    function updateUI(r) {
+
+      // Sliders display values
+
+      $('v-tdb').textContent = S.tdb + '°C';
+
+      $('v-rh').textContent = S.rh + '%';
+
+      $('v-pct').textContent = S.pct + '%';
+
+      $('v-flow').textContent = S.flow.toLocaleString('fr');
+
+      $('v-tsup').textContent = S.tsup + '°C';
+
+      $('v-troom').textContent = S.troom + '°C';
+
+      $('v-rhroom').textContent = S.rhroom + '%';
+
+      // Sub-labels
+
+      $('v-twb').textContent = fmt(r.Twb, 1) + '°C';
+
+      $('v-wout').textContent = (r.W_out * 1000).toFixed(1);
+
+      $('v-wroom').textContent = (r.W_room * 1000).toFixed(1);
+
+      // Save global flow for 3D fan spin
+
+      window.latestFlow = (r.mDot * 3600) / 1.2;
+
+      
+
+      // Room ACH
+
+      $('v-ach').textContent = 'ACH: ' + fmt(r.ach, 1) + ' vol/h';
+
+      $('v-mdot').textContent = fmt(r.mDot, 2);
+
+      // Balance
+
+      const hasFan = designerComponents.some(c => c.type === 'fan');
+
+      if (!hasFan) {
+
+        if($('bal-qs')) $('bal-qs').textContent = '—';
+
+        if($('bal-ql')) $('bal-ql').textContent = '—';
+
+        if($('bal-qt')) $('bal-qt').textContent = 'N/A ● Pas de ventilateur';
+
+        if($('bal-qt')) $('bal-qt').style.color = 'var(--alert)';
+
+        if($('bal-wf')) $('bal-wf').textContent = '—';
+
+        if($('bal-cop')) $('bal-cop').textContent = '—';
+
+        if($('bal-tmix')) $('bal-tmix').textContent = '—';
+
+        if($('bal-dh')) $('bal-dh').textContent = '—';
+
+        if($('bal-shf')) $('bal-shf').textContent = '—';
+
+      } else {
+
+        if($('bal-qs')) $('bal-qs').textContent = fmt(r.Qs, 2) + ' kW';
+
+        if($('bal-ql')) $('bal-ql').textContent = fmt(r.Ql, 2) + ' kW';
+
+        if($('bal-qt')) $('bal-qt').textContent = fmt(r.Qt, 2) + ' kW';
+
+        if($('bal-qt')) $('bal-qt').style.color = 'var(--cool)';
+
+        if($('bal-wf')) $('bal-wf').textContent = fmt(r.Wf, 2) + ' kW';
+
+        if($('bal-cop')) $('bal-cop').textContent = fmt(r.COP, 2);
+
+        if($('bal-tmix')) $('bal-tmix').textContent = fmt(r.T_mix, 1) + '°C';
+
+        if($('bal-dh')) $('bal-dh').textContent = fmt(r.dh, 1) + ' kJ/kg';
+
+        if($('bal-shf')) $('bal-shf').textContent = fmt(r.SHF, 2);
+
+      }
+
+      // Comfort indicator
+
+      const comf = S.troom >= 22 && S.troom <= 26 && S.rhroom >= 40 && S.rhroom <= 60;
+
+      $('v-comfort').textContent = comf ? 'ISO I ✓' : '⚠️ Hors zone';
+
+      $('v-comfort').style.color = comf ? 'var(--eco)' : 'var(--alert)';
+
+      // Badges (safe - elements may not exist in console layout)
+      const be = $('badge-ext');
+      if (be) {
+        if (S.tdb > 35) { be.textContent = 'TR\u00c8S CHAUD'; be.className = 'ctrl-badge badge-bad'; }
+        else if (S.tdb > 28) { be.textContent = 'CHAUD'; be.className = 'ctrl-badge badge-warn'; }
+        else { be.textContent = 'TEMP\u00c9R\u00c9'; be.className = 'ctrl-badge badge-ok'; }
+      }
+      const bn = $('badge-neuf');
+      if (bn) {
+        if (S.pct < 15) { bn.textContent = 'MINI'; bn.className = 'ctrl-badge badge-bad'; }
+        else if (S.pct < 50) { bn.textContent = '\u00c9CO'; bn.className = 'ctrl-badge badge-warn'; }
+        else { bn.textContent = 'MAX'; bn.className = 'ctrl-badge badge-ok'; }
+      }
+      const bs = $('badge-sup');
+      if (bs) {
+        if (S.tsup < 10) { bs.textContent = '< ISO A'; bs.className = 'ctrl-badge badge-bad'; }
+        else if (S.tsup <= 16) { bs.textContent = 'ISO A'; bs.className = 'ctrl-badge badge-ok'; }
+        else { bs.textContent = 'CHAUD'; bs.className = 'ctrl-badge badge-warn'; }
+      }
+
+      // Comfort bars (safe - may not exist)
+      const fillTdb = $('fill-tdb');
+      if (fillTdb) {
+        const tRatio = (S.tdb - (-10)) / (45 - (-10));
+        fillTdb.style.width = (tRatio * 100) + '%';
+        fillTdb.style.background = S.tdb > 35 ? 'var(--heat)' : S.tdb < 10 ? 'var(--cool)' : 'var(--eco)';
+      }
+      const fillSup = $('fill-sup');
+      if (fillSup) {
+        const sRatio = (S.tsup - 8) / (22 - 8);
+        fillSup.style.width = (sRatio * 100) + '%';
+        fillSup.style.background = S.tsup < 12 ? 'var(--cool)' : S.tsup > 18 ? 'var(--heat)' : 'var(--eco)';
+      }
+      // Update system chip overlay
+      const chipQt = $('bal-qt-chip');
+      if (chipQt) chipQt.textContent = hasFan ? fmt(r.Qt, 1) + ' kW' : '---';
+      const chipCop = $('bal-cop-chip');
+      if (chipCop) chipCop.textContent = hasFan ? fmt(r.COP, 2) : '---';
+      const chipShf = $('bal-shf-chip');
+      if (chipShf) chipShf.textContent = hasFan ? fmt(r.SHF, 2) : '---';
+
+      // Dashboard KPIs
+
+      const dc = $('dash-cop'); if(dc) dc.innerHTML = fmt(r.COP, 1) + '<span class="kpi-unit">—</span>';
+
+      const dp = $('dash-power'); if(dp) dp.innerHTML = fmt(r.Qt, 2) + '<span class="kpi-unit">kW</span>';
+
+      // 2D flow particle speed
+
+      update2DFlow(r);
+
+      // Mini psychro
+
+      updateMiniPsychro(r);
+
+      // Sparkline
+
+      updateSparkline();
+      tickEnergyChart(r.Qt);
+      tickTendancesChart(r);
+
+      // 3D particle color/speed
+
+      if (r.Qt && psys.supply) psys.supply.mat.color.setHex(tempToHex(S.tsup));
+
+      if (psys.mixed) psys.mixed.mat.color.setHex(tempToHex(r.T_mix));
+
+      
+
+      // Calculate real-time physical airflow from engine (mDot in kg/s to m3/h)
+
+      const realFlow = (r.mDot * 3600) / 1.2;
+
+      const spd = realFlow / 8000;
+
+      Object.values(psys).forEach(ps => { if (ps) ps.speed = 0.0025 * spd; });
+
+    }
+
+    function update2DFlow(r) {
+
+      const realFlow = (r.mDot * 3600) / 1.2;
+
+      const dur = realFlow > 0 ? Math.max(0.7, 5.5 - realFlow / 4500) : 0;
+
+      
+
+      document.querySelectorAll('#flow-svg animateMotion').forEach(a => {
+
+        if (realFlow <= 0) {
+
+          // Effectively stop the animation if flow is 0
+
+          a.setAttribute('dur', '9999s');
+
+        } else {
+
+          a.setAttribute('dur', dur + 's');
+
+        }
+
+      });
+
+      const sc = tempToRGB(S.tsup);
+
+      ['sup1', 'sup2', 'sup3'].forEach(id => { const el = $(id); if (el) el.style.color = sc; });
+
+      const mc = tempToRGB(r.T_mix);
+
+      ['mix1', 'mix2'].forEach(id => { const el = $(id); if (el) el.style.color = mc; });
+
+    }
+
+    function tempToRGB(t) {
+
+      const ratio = Math.max(0, Math.min(1, (t - 8) / (40 - 8)));
+
+      return `rgb(${Math.round(ratio * 230)},${Math.round(119 * (1 - ratio))},${Math.round(182 * (1 - ratio))})`;
+
+    }
+
+    function tempToHex(t) {
+
+      const r = Math.max(0, Math.min(1, (t - 8) / (40 - 8)));
+
+      return (Math.round(r * 230) << 16) | (Math.round(119 * (1 - r)) << 8) | Math.round(182 * (1 - r));
+
+    }
+
+    // ══════════════════════════════════════════════════
+
+    // CONTROLS BINDING
+
+    // ══════════════════════════════════════════════════
+
+    const sliders = [
+
+      ['s-tdb', 'tdb'], ['s-rh', 'rh'], ['s-pct', 'pct'],
+
+      ['s-flow', 'flow'], ['s-tsup', 'tsup'], ['s-troom', 'troom'], ['s-rhroom', 'rhroom']
+
+    ];
+
+    sliders.forEach(([id, key]) => {
+
+      const el = $(id); if (!el) return;
+
+      el.addEventListener('input', e => {
+
+        S[key] = parseFloat(e.target.value);
+
+        const r = calc(); updateUI(r); // instant local feedback
+
+        // Debounce API call
+
+        clearTimeout(el._t);
+
+        el._t = setTimeout(() => recalc(), 400);
+
+      });
+
+    });
+
+    // View toggles
+
+    $('btn-3d').addEventListener('click', () => {
+
+      $('btn-3d').classList.add('active'); $('btn-2d').classList.remove('active');
+
+      $('three-wrap').classList.remove('hide'); $('svg-wrap').classList.remove('show');
+
+    });
+
+    $('btn-2d').addEventListener('click', () => {
+
+      $('btn-2d').classList.add('active'); $('btn-3d').classList.remove('active');
+
+      $('three-wrap').classList.add('hide'); $('svg-wrap').classList.add('show');
+
+    });
+
+    // Run simulation buttons (panel header + controls)
+
+    let simLoopInterval = null;
+
+    let isSimRunning = false;
+
+    async function runSimulation() {
+
+      const btns = [$('btn-run-sim'), $('btn-run-main')].filter(Boolean);
+
+      const svgEl = document.getElementById('flow-svg');
+
+      
+
+      if (isSimRunning) {
+
+        // Stop the simulation
+
+        clearInterval(simLoopInterval);
+
+        isSimRunning = false;
+
+        if (svgEl && svgEl.pauseAnimations) svgEl.pauseAnimations();
+
+        
+
+        btns.forEach(b => { 
+
+          if (b) { 
+
+            b.classList.remove('loading'); 
+
+            b.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" style="width:13px;height:13px"><polygon points="5 3 19 12 5 21 5 3"/></svg> Lancer la Simulation'; 
+
+            b.style.background = '';
+
+          } 
+
+        });
+
+      } else {
+
+        // Start the simulation
+
+        isSimRunning = true;
+
+        if (svgEl && svgEl.unpauseAnimations) svgEl.unpauseAnimations();
+
+        
+
+        btns.forEach(b => { 
+
+          if (b) { 
+
+            b.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" style="width:13px;height:13px"><rect x="6" y="6" width="12" height="12"/></svg> Arrêter Simulation'; 
+
+            b.style.background = 'var(--heat)';
+
+          } 
+
+        });
+
+        
+
+        // Tick every 500ms using the new physical step function!
+
+        simLoopInterval = setInterval(async () => {
+
+          await apiStep();
+
+        }, 500);
+
+      }
+
+    }
+
+    const runSimBtn = $('btn-run-sim');
+
+    if (runSimBtn) runSimBtn.addEventListener('click', runSimulation);
+
+    const runMainBtn = $('btn-run-main');
+
+    if (runMainBtn) runMainBtn.addEventListener('click', runSimulation);
+
+    // Reset button ● restore default slider values
+
+    const resetDefaults = { tdb: 34, rh: 50, pct: 40, flow: 8000, tsup: 13, troom: 24, rhroom: 50 };
+
+    const resetBtn = $('btn-reset-sim');
+
+    if (resetBtn) resetBtn.addEventListener('click', () => {
+
+      Object.assign(S, resetDefaults);
+
+      sliders.forEach(([id, key]) => { const el = $(id); if (el) el.value = S[key]; });
+
+      const r = calc(); updateUI(r); updateMiniPsychro(r);
+
+    });
+
+    // ══════════════════════════════════════════════════
+
+    // MINI PSYCHROMETRIC SVG
+
+    // ══════════════════════════════════════════════════
+
+    function updateMiniPsychro(r) {
+
+      const svg = $('mini-psychro'); if (!svg) return;
+
+      const xMap = T => 15 + (T + 5) / 57 * 370;
+
+      const yMap = W => 165 - (W * 1000) / 26 * 150;
+
+      let satPath = 'M';
+
+      for (let T = -5; T <= 52; T += 2) {
+
+        const Ws = P.W(T, 100) * 1000;
+
+        satPath += ` ${xMap(T).toFixed(1)},${yMap(Ws).toFixed(1)}`;
+
+      }
+
+      const Wog = r.W_out * 1000, Wmg = r.W_mix * 1000, Wsg = r.W_sup * 1000, Wrg = r.W_room * 1000;
+
+      const To = S.tdb, Tm = r.T_mix, Ts = S.tsup, Tr = S.troom;
+
+      svg.innerHTML = `
+
+    <rect width="400" height="180" fill="transparent"/>
+
+    ${[0, 10, 20, 30, 40].map(T => `
+
+      <line x1="${xMap(T)}" y1="0" x2="${xMap(T)}" y2="165" stroke="#21262d" stroke-width="0.5"/>
+
+      <text x="${xMap(T)}" y="176" text-anchor="middle" fill="#484f58" font-size="8" font-family="DM Sans">${T}°C</text>
+
+    `).join('')}
+
+    ${[0, 8, 16, 24].map(W => `
+
+      <line x1="15" y1="${yMap(W)}" x2="385" y2="${yMap(W)}" stroke="#21262d" stroke-width="0.5"/>
+
+      <text x="12" y="${yMap(W) + 2}" text-anchor="end" fill="#3d444d" font-size="7" font-family="DM Sans">${W}</text>
+
+    `).join('')}
+
+    <path d="${satPath} L ${xMap(52)} 0 L 15 0 Z" fill="rgba(0,119,182,0.06)" stroke="#0077b6" stroke-width="0.8"/>
+
+    <line x1="${xMap(To)}" y1="${yMap(Wog)}" x2="${xMap(Tm)}" y2="${yMap(Wmg)}" stroke="#2a9d8f" stroke-width="1.5" stroke-dasharray="3 2"/>
+
+    <line x1="${xMap(Tm)}" y1="${yMap(Wmg)}" x2="${xMap(Ts)}" y2="${yMap(Wsg)}" stroke="#0077b6" stroke-width="2"/>
+
+    <line x1="${xMap(Ts)}" y1="${yMap(Wsg)}" x2="${xMap(Tr)}" y2="${yMap(Wrg)}" stroke="#e63946" stroke-width="1.2" stroke-dasharray="2 2"/>
+
+    <circle cx="${xMap(To)}" cy="${yMap(Wog)}" r="4.5" fill="#f4a261" stroke="#0d1117" stroke-width="1"/>
+
+    <text x="${xMap(To) + 7}" y="${yMap(Wog) - 4}" fill="#f4a261" font-size="9" font-family="Syne" font-weight="700">EXT</text>
+    <text x="${xMap(To) + 7}" y="${yMap(Wog) + 8}" fill="#f4a261" font-size="7" font-family="DM Sans">${To}°C / ${Wog.toFixed(1)}g</text>
+
+    <circle cx="${xMap(Tm)}" cy="${yMap(Wmg)}" r="4" fill="#2a9d8f" stroke="#0d1117" stroke-width="1"/>
+
+    <text x="${xMap(Tm) + 7}" y="${yMap(Wmg) - 4}" fill="#2a9d8f" font-size="9" font-family="Syne" font-weight="700">MIX</text>
+    <text x="${xMap(Tm) + 7}" y="${yMap(Wmg) + 8}" fill="#2a9d8f" font-size="7" font-family="DM Sans">${Tm.toFixed(1)}°C</text>
+
+    <circle cx="${xMap(Ts)}" cy="${yMap(Wsg)}" r="4.5" fill="#0077b6" stroke="#0d1117" stroke-width="1"/>
+
+    <text x="${xMap(Ts) + 7}" y="${yMap(Wsg) - 4}" fill="#0077b6" font-size="9" font-family="Syne" font-weight="700">SUP</text>
+    <text x="${xMap(Ts) + 7}" y="${yMap(Wsg) + 8}" fill="#0077b6" font-size="7" font-family="DM Sans">${Ts}°C / ${Wsg.toFixed(1)}g</text>
+
+    <circle cx="${xMap(Tr)}" cy="${yMap(Wrg)}" r="4" fill="#e63946" stroke="#0d1117" stroke-width="1"/>
+
+    <text x="${xMap(Tr) - 10}" y="${yMap(Wrg) - 6}" fill="#e63946" font-size="9" font-family="Syne" font-weight="700">ZONE</text>
+    <text x="${xMap(Tr) - 10}" y="${yMap(Wrg) + 7}" fill="#e63946" font-size="7" font-family="DM Sans">${Tr}°C / ${Wrg.toFixed(1)}g</text>
+
+  `;
+
+    }
+
+    // ══════════════════════════════════════════════════
+
+    // SPARKLINE 24H ● Real thermal model
+
+    // ══════════════════════════════════════════════════
+
+    let sparkChart = null;
+
+    function updateSparkline() {
+
+      const canvas = $('sparkline'); if (!canvas) return;
+
+      const hrs = Array.from({ length: 24 }, (_, i) => i);
+
+      // 1st-order thermal model: zone temp responds with time constant Ï„=3h to outdoor swings
+
+      const tau = 3.0;
+
+      const dt = 1.0;
+
+      let Tz = S.troom;
+
+      const data = hrs.map(h => {
+
+        // Outdoor sinusoidal profile
+
+        const Tout_h = S.tdb + (S.tdb * 0.18) * Math.sin((h - 14) * Math.PI / 12);
+
+        // Solar gain contribution
+
+        const Qsol = Math.max(0, Math.sin((h - 6) * Math.PI / 12)) * 2.5;
+
+        // HVAC setpoint correction
+
+        const Qhvac = (S.troom - Tz) * 1.8;
+
+        // Zone temperature update (1st-order Euler)
+
+        const dTz = (dt / tau) * (Tout_h * 0.12 + Qsol * 0.08 + Qhvac - (Tz - S.troom) * 0.5);
+
+        Tz = parseFloat((Tz + dTz).toFixed(3));
+
+        return Tz;
+
+      });
+
+      const hi = S.troom + 1.5, lo = S.troom - 1.5;
+
+      const comfortBand = hrs.map(() => S.troom);
+
+      if (sparkChart) {
+
+        sparkChart.data.datasets[0].data = data;
+
+        sparkChart.data.datasets[1].data = hrs.map(() => hi);
+
+        sparkChart.data.datasets[2].data = hrs.map(() => lo);
+
+        sparkChart.update('none');
+
+        return;
+
+      }
+
+      sparkChart = new Chart(canvas, {
+
+        type: 'line',
+
+        data: {
+
+          labels: hrs.map(h => h + 'h'),
+
+          datasets: [
+
+            { label: 'T zone', data, borderColor: '#2a9d8f', backgroundColor: 'rgba(42,157,143,0.12)', fill: true, tension: 0.45, borderWidth: 1.8, pointRadius: 0 },
+
+            { label: 'Limite haute', data: hrs.map(() => hi), borderColor: 'rgba(214,40,40,0.6)', borderDash: [4, 3], borderWidth: 1.2, pointRadius: 0, fill: false },
+
+            { label: 'Limite basse', data: hrs.map(() => lo), borderColor: 'rgba(0,119,182,0.6)', borderDash: [4, 3], borderWidth: 1.2, pointRadius: 0, fill: false },
+            { label: 'T ext.', data: hrs.map(h => S.tdb + (S.tdb * 0.18) * Math.sin((h - 14) * Math.PI / 12)), borderColor: 'rgba(244,162,97,0.5)', borderWidth: 1, pointRadius: 0, fill: false, borderDash: [2, 2] },
+            { label: 'T soufflage', data: hrs.map(() => S.tsup), borderColor: 'rgba(0,119,182,0.4)', borderWidth: 1, pointRadius: 0, fill: false, borderDash: [6, 3] }
+
+          ]
+
+        },
+
+        options: {
+
+          responsive: true, maintainAspectRatio: false, animation: false,
+
+          plugins: {
+
+            legend: { display: true, labels: { color: '#484f58', font: { size: 8, family: 'DM Sans' }, boxWidth: 12, padding: 6 } },
+
+            tooltip: {
+
+              enabled: true, mode: 'index', intersect: false,
+
+              callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '°C' }
+
+            }
+
+          },
+
+          scales: {
+
+            x: { display: true, ticks: { color: '#484f58', font: { size: 8 }, maxTicksLimit: 8 }, grid: { color: 'rgba(255,255,255,.03)' } },
+
+            y: { display: true, ticks: { color: '#484f58', font: { size: 8 }, callback: v => v.toFixed(0) + '°' }, grid: { color: 'rgba(255,255,255,.04)' } }
+
+          }
+
+        }
+
+      });
+
+    }
+
+    // ══════════════════════════════════════════════════
+
+    // THREE.JS 3D SCENE
+
+    // ══════════════════════════════════════════════════
+
+    let scene3, cam3, renderer3, fanGroup, psys = {}, curves3 = {};
+
+    let autoAngle = 0;
+
+    function initThree() {
+
+      const wrap = $('three-wrap');
+
+      const canvas = $('three-canvas');
+
+      const W = wrap.clientWidth || 700, H = wrap.clientHeight || 400;
+
+      scene3 = new THREE.Scene();
+
+      scene3.background = new THREE.Color(0x0d1117);
+
+      scene3.fog = new THREE.FogExp2(0x0d1117, 0.028);
+
+      cam3 = new THREE.PerspectiveCamera(38, W / H, 0.1, 200);
+
+      cam3.position.set(14, 10, 14);
+
+      cam3.lookAt(0.5, 0, 0);
+
+      renderer3 = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+
+      renderer3.setSize(W, H);
+
+      renderer3.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      renderer3.shadowMap.enabled = true;
+
+      renderer3.shadowMap.type = THREE.PCFSoftShadowMap;
+
+      renderer3.toneMapping = THREE.ACESFilmicToneMapping;
+
+      renderer3.toneMappingExposure = 1.1;
+
+      // Lights
+
+      scene3.add(new THREE.AmbientLight(0x1a2035, 4));
+
+      const sun = new THREE.DirectionalLight(0xfff8f0, 2.5);
+
+      sun.position.set(10, 15, 8); sun.castShadow = true;
+
+      sun.shadow.mapSize.width = 2048; sun.shadow.mapSize.height = 2048;
+
+      scene3.add(sun);
+
+      const fill = new THREE.DirectionalLight(0x2040a0, 1.2);
+
+      fill.position.set(-8, 5, -5); scene3.add(fill);
+
+      // Point lights for color mood
+
+      const blueLight = new THREE.PointLight(0x0077b6, 4, 8); blueLight.position.set(-2, 2, 0); scene3.add(blueLight);
+
+      const redLight = new THREE.PointLight(0xe63946, 2, 8); redLight.position.set(6, 2, 0); scene3.add(redLight);
+
+      const cyanLight = new THREE.PointLight(0x48cae4, 3, 5); cyanLight.position.set(-1, 1, 0); scene3.add(cyanLight);
+
+      buildScene();
+
+      buildParticleSystems();
+
+      loopThree();
+
+      window.addEventListener('resize', () => {
+
+        const W2 = wrap.clientWidth, H2 = wrap.clientHeight;
+
+        cam3.aspect = W2 / H2; cam3.updateProjectionMatrix();
+
+        renderer3.setSize(W2, H2);
+
+      });
+
+    }
+
+    function mat(color, op = 1, shine = 40) {
+
+      return new THREE.MeshPhongMaterial({ color, transparent: op < 1, opacity: op, shininess: shine, side: THREE.DoubleSide });
+
+    }
+
+    function box(w, h, d, m, x, y, z, cast = true) {
+
+      const geo = new THREE.BoxGeometry(w, h, d);
+
+      const mesh = new THREE.Mesh(geo, m);
+
+      mesh.position.set(x, y, z);
+
+      mesh.castShadow = cast; mesh.receiveShadow = true;
+
+      scene3.add(mesh);
+
+      // Edge lines
+
+      const edges = new THREE.LineSegments(
+
+        new THREE.EdgesGeometry(geo),
+
+        new THREE.LineBasicMaterial({ color: 0x484f58, linewidth: 1 })
+
+      );
+
+      mesh.add(edges);
+
+      return mesh;
+
+    }
+
+    function buildScene() {
+
+      // Ground
+
+      const ground = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), mat(0x0d1117, 1, 0));
+
+      ground.rotation.x = -Math.PI / 2; ground.position.y = -2.55; ground.receiveShadow = true;
+
+      scene3.add(ground);
+
+      const grid = new THREE.GridHelper(30, 30, 0x161b22, 0x161b22);
+
+      grid.position.y = -2.54; scene3.add(grid);
+
+      // ”—€ AHU CASING ”—€
+
+      const casMat = mat(0x1c2128, 0.88, 60);
+
+      box(5, 2.2, 2.2, casMat, -2.5, 0, 0);
+
+      // ”—€ FILTER (green fins) ”—€
+
+      const filtMat = mat(0x2a9d8f, 0.8, 30);
+
+      box(0.15, 1.9, 1.9, filtMat, -4.6, 0, 0);
+
+      for (let z = -0.8; z <= 0.8; z += 0.22) {
+
+        box(0.1, 1.7, 0.04, mat(0x2a9d8f, 0.7), -4.6, 0, z, false);
+
+      }
+
+      // ”—€ MIXING CHAMBER ”—€
+
+      const mixMat = mat(0xf4a261, 0.45, 20);
+
+      box(0.9, 1.9, 1.9, mixMat, -3.8, 0, 0);
+
+      // ”—€ COOLING COIL ”—€
+
+      const coilMat = mat(0x0077b6, 0.75, 100);
+
+      box(0.55, 1.9, 1.9, coilMat, -2.4, 0, 0);
+
+      for (let z = -0.85; z <= 0.85; z += 0.18) {
+
+        box(0.45, 1.75, 0.04, mat(0x48cae4, 0.55, 80), -2.4, 0, z, false);
+
+      }
+
+      // Condensate pan
+
+      box(0.7, 0.1, 2.0, mat(0x21262d, 0.9), -2.4, -1.05, 0, false);
+
+      // ”—€ FAN ”—€
+
+      fanGroup = new THREE.Group();
+
+      fanGroup.position.set(-1.0, 0, 0);
+
+      // Housing
+
+      const hous = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.75, 0.45, 32), mat(0x21262d, 0.85, 50));
+
+      hous.rotation.z = Math.PI / 2; fanGroup.add(hous);
+
+      // Blades
+
+      for (let i = 0; i < 7; i++) {
+
+        const bGeo = new THREE.BoxGeometry(0.07, 0.58, 0.07);
+
+        const bMesh = new THREE.Mesh(bGeo, mat(0x48cae4, 1, 120));
+
+        bMesh.position.y = 0.3;
+
+        const piv = new THREE.Group();
+
+        piv.rotation.x = (i / 7) * Math.PI * 2;
+
+        piv.add(bMesh);
+
+        fanGroup.add(piv);
+
+      }
+
+      // Hub
+
+      const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.5, 16), mat(0xe6edf3, 1, 150));
+
+      hub.rotation.z = Math.PI / 2; fanGroup.add(hub);
+
+      scene3.add(fanGroup);
+
+      // ”—€ SUPPLY DUCT ”—€
+
+      box(4.2, 0.85, 0.85, mat(0x161b22, 0.9, 20), 2.6, 0, 0);
+
+      // Supply duct glow strip
+
+      const stripGeo = new THREE.BoxGeometry(4.0, 0.06, 0.84);
+
+      const strip = new THREE.Mesh(stripGeo, new THREE.MeshPhongMaterial({ color: 0x0077b6, emissive: 0x001133, emissiveIntensity: 0.5, transparent: true, opacity: 0.4 }));
+
+      strip.position.set(2.6, -0.35, 0); scene3.add(strip);
+
+      // ”—€ RETURN DUCT ”—€
+
+      box(4.2, 0.85, 0.85, mat(0x161b22, 0.9, 20), 2.6, 2.1, 0);
+
+      // Vertical return
+
+      box(0.85, 2.2, 0.85, mat(0x161b22, 0.88), 4.7, 1.05, 0);
+
+      // ”—€ OUTDOOR AIR DUCT ”—€
+
+      box(0.85, 2.8, 0.85, mat(0x161b22, 0.88), -3.8, 2.5, 0);
+
+      // Intake grille top
+
+      const grilleMat = mat(0x21262d, 0.95);
+
+      box(1.2, 0.12, 1.2, grilleMat, -3.8, 3.9, 0, false);
+
+      for (let i = -0.45; i <= 0.45; i += 0.2) {
+
+        box(1.1, 0.06, 0.04, mat(0x484f58, 0.8), -3.8, 3.85, i, false);
+
+      }
+
+      // ”—€ BUILDING ”—€
+
+      const bldMat = mat(0x161b22, 0.92, 15);
+
+      box(2.2, 3.4, 2.8, bldMat, 6.6, 0.7, 0);
+
+      // Roof
+
+      box(2.4, 0.12, 3.0, mat(0x21262d, 0.95), 6.6, 2.46, 0, false);
+
+      // Windows
+
+      const winMat = new THREE.MeshPhongMaterial({ color: 0x0077b6, emissive: 0x002244, emissiveIntensity: 0.8, transparent: true, opacity: 0.55 });
+
+      for (let row = 0; row < 2; row++) {
+
+        for (let col = 0; col < 3; col++) {
+
+          const win = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.5, 0.07), winMat);
+
+          win.position.set(6.6 + 0.55 - col * 0.6, 1.1 - row * 0.85, 1.44);
+
+          scene3.add(win);
+
+        }
+
+      }
+
+      // Entrance door
+
+      const doorMat = mat(0x21262d, 0.95, 10);
+
+      box(0.6, 0.9, 0.07, doorMat, 6.6, -0.85, 1.45, false);
+
+      // ”—€ DUCT CONNECTIONS (visual) ”—€
+
+      // Connecting elbow from supply duct to building
+
+      box(0.5, 0.85, 0.85, mat(0x161b22, 0.85), 4.7, 0, 0, false);
+
+      box(0.5, 0.85, 0.85, mat(0x161b22, 0.85), 5.6, 0, 0, false);
+
+      // Return elbow
+
+      box(0.5, 0.85, 0.85, mat(0x161b22, 0.85), 4.7, 2.1, 0, false);
+
+      box(0.5, 0.85, 0.85, mat(0x161b22, 0.85), 5.6, 2.1, 0, false);
+
+      // ”—€ LABELS as floating plates ”—€
+
+      const labelData = [
+
+        { text: 'FILTRE', x: -4.6, y: 1.6, color: 0x2a9d8f },
+
+        { text: 'BATT. FROIDE', x: -2.4, y: 1.6, color: 0x0077b6 },
+
+        { text: 'VENTILATEUR', x: -1.0, y: 1.6, color: 0x48cae4 },
+
+        { text: 'BÂTIMENT', x: 6.6, y: 2.9, color: 0x8b949e },
+
+      ];
+
+      // We skip actual text geometry (expensive), rely on colors + glow
+
+    }
+
+    // ”—€ Particle Systems ”—€
+
+    const COLORS3D = { return: 0xe63946, supply: 0x0077b6, outdoor: 0xf4a261, mixed: 0x2a9d8f };
+
+    function buildParticleSystems() {
+
+      curves3.return = new THREE.CatmullRomCurve3([
+
+        new THREE.Vector3(5.5, 0.7, 0),
+
+        new THREE.Vector3(4.7, 0.7, 0),
+
+        new THREE.Vector3(4.7, 2.1, 0),
+
+        new THREE.Vector3(2.6, 2.1, 0),
+
+        new THREE.Vector3(-1, 2.1, 0),
+
+        new THREE.Vector3(-3.8, 2.1, 0),
+
+        new THREE.Vector3(-3.8, 0.95, 0),
+
+      ]);
+
+      curves3.supply = new THREE.CatmullRomCurve3([
+
+        new THREE.Vector3(-0.4, 0, 0),
+
+        new THREE.Vector3(0.5, 0, 0),
+
+        new THREE.Vector3(2.6, 0, 0),
+
+        new THREE.Vector3(4.7, 0, 0),
+
+        new THREE.Vector3(5.5, 0.4, 0),
+
+      ]);
+
+      curves3.outdoor = new THREE.CatmullRomCurve3([
+
+        new THREE.Vector3(-3.8, 3.9, 0),
+
+        new THREE.Vector3(-3.8, 3.0, 0),
+
+        new THREE.Vector3(-3.8, 1.6, 0),
+
+        new THREE.Vector3(-3.8, 0.4, 0),
+
+      ]);
+
+      curves3.mixed = new THREE.CatmullRomCurve3([
+
+        new THREE.Vector3(-3.8, 0, 0),
+
+        new THREE.Vector3(-3.0, 0, 0.1),
+
+        new THREE.Vector3(-2.4, 0, 0),
+
+        new THREE.Vector3(-1.8, 0, -0.1),
+
+        new THREE.Vector3(-0.4, 0, 0),
+
+      ]);
+
+      Object.keys(curves3).forEach(key => {
+
+        const N = 10;
+
+        const geo = new THREE.BufferGeometry();
+
+        const pos = new Float32Array(N * 3);
+
+        geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+
+        const m = new THREE.PointsMaterial({
+
+          color: COLORS3D[key], size: 0.14,
+
+          transparent: true, opacity: 0.95,
+
+          sizeAttenuation: true
+
+        });
+
+        const pts = new THREE.Points(geo, m);
+
+        scene3.add(pts);
+
+        const offsets = Array.from({ length: N }, (_, i) => i / N);
+
+        psys[key] = { pts, mat: m, N, offsets, speed: 0.0025, geo };
+
+      });
+
+    }
+
+    function animParticles() {
+
+      Object.entries(psys).forEach(([key, ps]) => {
+
+        const curve = curves3[key];
+
+        const pos = ps.geo.attributes.position.array;
+
+        for (let i = 0; i < ps.N; i++) {
+
+          ps.offsets[i] = (ps.offsets[i] + ps.speed) % 1;
+
+          const pt = curve.getPoint(ps.offsets[i]);
+
+          pos[i * 3] = pt.x; pos[i * 3 + 1] = pt.y; pos[i * 3 + 2] = pt.z;
+
+        }
+
+        ps.geo.attributes.position.needsUpdate = true;
+
+      });
+
+    }
+
+    let t3 = 0, autoRotate3 = true, axesHelper3 = null;
+
+    // Free camera state
+
+    let camRadius = 19, camTheta = Math.PI / 4, camPhi = 1.1;
+
+    let camTarget = new THREE.Vector3(0.5, 0.3, 0);
+
+    let isDragging = false, isPanning = false, dragBtn = -1;
+
+    let prevMouseX = 0, prevMouseY = 0;
+
+    function updateCamFromSpherical() {
+
+      cam3.position.x = camTarget.x + camRadius * Math.sin(camPhi) * Math.cos(camTheta);
+
+      cam3.position.y = camTarget.y + camRadius * Math.cos(camPhi);
+
+      cam3.position.z = camTarget.z + camRadius * Math.sin(camPhi) * Math.sin(camTheta);
+
+      cam3.lookAt(camTarget);
+
+    }
+
+    function initThreeControls() {
+
+      const canvas = $('three-canvas');
+
+      if (!canvas) return;
+
+      // ”—€ Mouse wheel: zoom (no min limit ● user can go inside the object)
+
+      canvas.addEventListener('wheel', e => {
+
+        e.preventDefault();
+
+        const zoomSpeed = camRadius * 0.08; // proportional zoom
+
+        camRadius = Math.max(0.3, Math.min(80, camRadius + Math.sign(e.deltaY) * zoomSpeed));
+
+      }, { passive: false });
+
+      // ”—€ Mouse down: start orbit (left) or pan (right/middle)
+
+      canvas.addEventListener('mousedown', e => {
+
+        e.preventDefault();
+
+        isDragging = true;
+
+        dragBtn = e.button;
+
+        isPanning = (e.button === 1 || e.button === 2); // middle or right = pan
+
+        prevMouseX = e.clientX;
+
+        prevMouseY = e.clientY;
+
+        autoRotate3 = false; // stop auto-rotate on any interaction
+
+        const tcOrbit = $('tc-orbit');
+
+        if (tcOrbit) { tcOrbit.classList.remove('on'); tcOrbit.style.color = 'var(--heat)'; }
+
+      });
+
+      // ”—€ Mouse move: orbit or pan
+
+      window.addEventListener('mousemove', e => {
+
+        if (!isDragging) return;
+
+        const dx = e.clientX - prevMouseX;
+
+        const dy = e.clientY - prevMouseY;
+
+        prevMouseX = e.clientX;
+
+        prevMouseY = e.clientY;
+
+        if (isPanning) {
+
+          // Pan: move camTarget along camera-local right/up
+
+          const right = new THREE.Vector3();
+
+          const up = new THREE.Vector3();
+
+          cam3.getWorldDirection(new THREE.Vector3());
+
+          right.setFromMatrixColumn(cam3.matrix, 0);
+
+          up.setFromMatrixColumn(cam3.matrix, 1);
+
+          const panSpeed = camRadius * 0.002;
+
+          camTarget.addScaledVector(right, -dx * panSpeed);
+
+          camTarget.addScaledVector(up, dy * panSpeed);
+
+        } else {
+
+          // Orbit: free rotation in any direction
+
+          camTheta -= dx * 0.006;
+
+          camPhi -= dy * 0.006;
+
+          camPhi = Math.max(0.05, Math.min(Math.PI - 0.05, camPhi)); // avoid gimbal lock
+
+        }
+
+      });
+
+      // ”—€ Mouse up
+
+      window.addEventListener('mouseup', () => { isDragging = false; isPanning = false; });
+
+      // ”—€ Prevent context menu on right-click
+
+      canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+      // ”—€ Orbit toggle button
+
+      const tcOrbit = $('tc-orbit');
+
+      if (tcOrbit) tcOrbit.addEventListener('click', () => {
+
+        autoRotate3 = !autoRotate3;
+
+        tcOrbit.classList.toggle('on', autoRotate3);
+
+        tcOrbit.style.color = autoRotate3 ? '' : 'var(--heat)';
+
+      });
+
+      // ”—€ Axes toggle
+
+      const tcAxes = $('tc-axes');
+
+      if (tcAxes) tcAxes.addEventListener('click', () => {
+
+        if (axesHelper3) {
+
+          scene3.remove(axesHelper3); axesHelper3 = null;
+
+          tcAxes.classList.remove('on');
+
+        } else {
+
+          axesHelper3 = new THREE.AxesHelper(5); scene3.add(axesHelper3);
+
+          tcAxes.classList.add('on');
+
+        }
+
+      });
+
+      // ”—€ Zoom buttons (no min limit)
+
+      const tcZin = $('tc-zin'), tcZout = $('tc-zout'), tcReset = $('tc-reset');
+
+      if (tcZin) tcZin.addEventListener('click', () => camRadius = Math.max(0.3, camRadius - 2));
+
+      if (tcZout) tcZout.addEventListener('click', () => camRadius = Math.min(80, camRadius + 2));
+
+      if (tcReset) tcReset.addEventListener('click', () => {
+
+        camRadius = 19; camTheta = Math.PI / 4; camPhi = 1.1;
+
+        camTarget.set(0.5, 0.3, 0);
+
+        autoRotate3 = true;
+
+        const tcOrb = $('tc-orbit');
+
+        if (tcOrb) { tcOrb.classList.add('on'); tcOrb.style.color = ''; }
+
+      });
+
+    }
+
+    function loopThree() {
+
+      requestAnimationFrame(loopThree);
+
+      t3 += 0.008;
+
+      // Camera orbit (only if autoRotate)
+
+      if (autoRotate3) camTheta += 0.0012;
+
+      // Update camera position from spherical coords
+
+      updateCamFromSpherical();
+
+      // Fan & particles ONLY run when simulation is active
+
+      if (isSimRunning) {
+
+        const realFlow = window.latestFlow || S.flow;
+
+        if (fanGroup) { const spd = (realFlow / 8000) * 0.18; fanGroup.rotation.x += spd; }
+
+        animParticles();
+
+      }
+
+      renderer3.render(scene3, cam3);
+
+    }
+
+    // ══════════════════════════════════════════════════
+
+    // DASHBOARD CHARTS
+
+    // ══════════════════════════════════════════════════
+
+    let dashInited = false;
+
+    function initDashboard() {
+
+      if (dashInited) return; dashInited = true;
+
+      // KPI sparklines
+
+      const sparkData = () => Array.from({ length: 12 }, (_, i) => 20 + Math.random() * 30);
+
+      const mkSpark = (id, color) => {
+
+        const c = document.getElementById(id); if (!c) return;
+
+        new Chart(c, {
+
+          type: 'line',
+
+          data: { labels: Array(12).fill(''), datasets: [{ data: sparkData(), borderColor: color, fill: true, backgroundColor: color + '22', tension: 0.4, borderWidth: 1.5, pointRadius: 0 }] },
+
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } }, animation: false }
+
+        });
+
+      };
+
+      mkSpark('spark-cop', '#0077b6');
+
+      mkSpark('spark-power', '#e63946');
+
+      mkSpark('spark-discomfort', '#d62828');
+
+      mkSpark('spark-co2', '#2a9d8f');
+
+      // Energy bar chart
+
+      const ec = $('chart-energy'); if (!ec) return;
+
+      new Chart(ec, {
+
+        type: 'bar',
+
+        data: {
+
+          labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
+
+          datasets: [
+
+            { label: 'Refroidissement', data: [2100, 2800, 5200, 8900, 14500, 22000, 28000, 27000, 19000, 11000, 5500, 2200], backgroundColor: 'rgba(0,119,182,0.75)', borderColor: '#0077b6', borderWidth: 1, borderRadius: 3 },
+
+            { label: 'Chauffage', data: [8500, 7200, 4100, 1500, 300, 0, 0, 0, 500, 2100, 5800, 8200], backgroundColor: 'rgba(230,57,70,0.75)', borderColor: '#e63946', borderWidth: 1, borderRadius: 3 },
+
+            { label: 'Ventilation', data: [1800, 1800, 1800, 1800, 1800, 1800, 1800, 1800, 1800, 1800, 1800, 1800], backgroundColor: 'rgba(42,157,143,0.75)', borderColor: '#2a9d8f', borderWidth: 1, borderRadius: 3 }
+
+          ]
+
+        },
+
+        options: {
+
+          responsive: true, maintainAspectRatio: false,
+
+          plugins: { legend: { labels: { color: '#8b949e', font: { size: 10.5, family: 'DM Sans' }, boxWidth: 9, padding: 12 } } },
+
+          scales: {
+
+            x: { stacked: true, ticks: { color: '#484f58', font: { size: 10 } }, grid: { color: 'rgba(139,148,158,0.05)' } },
+
+            y: { stacked: true, ticks: { color: '#484f58', font: { size: 10 } }, grid: { color: 'rgba(139,148,158,0.07)' } }
+
+          }
+
+        }
+
+      });
+
+      // Modes donut
+
+      const mc = $('chart-modes'); if (!mc) return;
+
+      new Chart(mc, {
+
+        type: 'doughnut',
+
+        data: {
+
+          labels: ['Refroidissement', 'Chauffage', 'Free-cooling', 'Ventilation'],
+
+          datasets: [{
+
+            data: [42, 28, 18, 12],
+
+            backgroundColor: ['rgba(0,119,182,0.85)', 'rgba(230,57,70,0.85)', 'rgba(42,157,143,0.85)', 'rgba(108,117,125,0.85)'],
+
+            borderColor: ['#0077b6', '#e63946', '#2a9d8f', '#6c757d'],
+
+            borderWidth: 1.5
+
+          }]
+
+        },
+
+        options: {
+
+          responsive: true, maintainAspectRatio: false, cutout: '65%',
+
+          plugins: { legend: { position: 'bottom', labels: { color: '#8b949e', font: { size: 10, family: 'DM Sans' }, boxWidth: 8, padding: 8 } } }
+
+        }
+
+      });
+
+    }
+
+    // ══════════════════════════════════════════════════
+
+    // PROJECTS
+
+    // ══════════════════════════════════════════════════
+
+    const projs = [
+
+      { name: 'Siège Social Tunis', desc: "CTA 20 000 m³/h, 5 zones, free-cooling intégré. Optimisation en cours.", sc: 4, upd: 'Il y a 2h', badge: 'cool', icon: '🏢' },
+
+      { name: 'Hôpital Nord', desc: "Traitement air stérile, filtration HEPA H14, contrôle pression différentielle.", sc: 6, upd: 'Hier', badge: 'heat', icon: '🏥' },
+
+      { name: 'Centre Commercial', desc: "Multi-zones 45 000 m³/h, récupération énergie sur air vicié, COP >4.", sc: 3, upd: 'Il y a 3j', badge: 'eco', icon: '🏬' },
+
+    ];
+
+    function renderProjects() {
+
+      const grid = $('proj-grid'); if (!grid) return;
+
+      grid.innerHTML = projs.map(p => `
+
+    <div class="pcard">
+
+      <div class="pcard-badge" style="background:var(--${p.badge}-d)">${p.icon}</div>
+
+      <div class="pcard-name">${p.name}</div>
+
+      <div class="pcard-desc">${p.desc}</div>
+
+      <div class="pcard-foot">
+
+        <div style="display:flex;align-items:center;gap:5px"><div style="width:5px;height:5px;border-radius:50%;background:var(--eco)"></div>${p.sc} scénarios</div>
+
+        <span>${p.upd}</span>
+
+      </div>
+
+    </div>
+
+  `).join('') + `
+
+    <div class="pcard new-card">
+
+      <div style="font-size:22px">+</div>
+
+      <div style="font-family:var(--fh);font-size:11.5px;font-weight:700">Nouveau Projet</div>
+
+    </div>
+
+  `;
+
+    }
+
+    // ══════════════════════════════════════════════════
+
+    // INIT
+
+    // ══════════════════════════════════════════════════
+
+    window.addEventListener('DOMContentLoaded', async () => {
+
+    // --- FULLSCREEN LOGIC ---
+    if($('btn-fs')) {
+      $('btn-fs').addEventListener('click', () => {
+        const elem = document.querySelector('.sim-canvas-area');
+        if (!document.fullscreenElement) {
+          if (elem.requestFullscreen) elem.requestFullscreen();
+          else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+          $('btn-fs').innerHTML = '&#x2715;'; // close icon
+        } else {
+          if (document.exitFullscreen) document.exitFullscreen();
+          else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+          $('btn-fs').innerHTML = '&#x26F6;'; // fs icon
+        }
+      });
+      document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement) $('btn-fs').innerHTML = '&#x26F6;';
+        // force resize for ThreeJS and ChartJS
+        setTimeout(() => window.dispatchEvent(new Event('resize')), 100);
+      });
+    }
+
+    // --- 2D ZOOM LOGIC ---
+    let svgZoom = 1;
+    let svgPanX = 0, svgPanY = 0;
+    let isSvgDragging = false;
+    let svgLastX = 0, svgLastY = 0;
+
+    function applySvgViewBox() {
+      const svg = $('flow-svg');
+      if (!svg) return;
+      const w = 800 / svgZoom;
+      const h = 400 / svgZoom;
+      svg.setAttribute('viewBox', `${svgPanX} ${svgPanY} ${w} ${h}`);
+    }
+
+    if($('svg-zin')) $('svg-zin').addEventListener('click', () => { svgZoom *= 1.2; applySvgViewBox(); });
+    if($('svg-zout')) $('svg-zout').addEventListener('click', () => { svgZoom /= 1.2; applySvgViewBox(); });
+    if($('svg-reset')) $('svg-reset').addEventListener('click', () => { svgZoom = 1; svgPanX = 0; svgPanY = 0; applySvgViewBox(); });
+
+    const svgElm = $('flow-svg');
+    if (svgElm) {
+      svgElm.addEventListener('wheel', e => {
+        e.preventDefault();
+        const factor = e.deltaY < 0 ? 1.1 : 1/1.1;
+        svgZoom *= factor;
+        applySvgViewBox();
+      });
+      svgElm.addEventListener('mousedown', e => {
+        if (e.button !== 0) return;
+        isSvgDragging = true;
+        svgLastX = e.clientX;
+        svgLastY = e.clientY;
+        svgElm.style.cursor = 'grabbing';
+      });
+      window.addEventListener('mousemove', e => {
+        if (!isSvgDragging) return;
+        const dx = e.clientX - svgLastX;
+        const dy = e.clientY - svgLastY;
+        svgLastX = e.clientX;
+        svgLastY = e.clientY;
+        // scale drag distance by zoom
+        svgPanX -= dx / svgZoom;
+        svgPanY -= dy / svgZoom;
+        applySvgViewBox();
+      });
+      window.addEventListener('mouseup', () => {
+        isSvgDragging = false;
+        if(svgElm) svgElm.style.cursor = 'grab';
+      });
+    }
+
+
+      renderProjects();
+
+      initThree();
+
+      initThreeControls();
+
+      // Generate initial 2D SVG from default designer components
+
+      generateFlowSVG(designerComponents);
+
+      // Force initial render immediately so charts aren't blank
+
+      const initR = calc();
+
+      updateUI(initR);
+
+      updateMiniPsychro(initR);
+
+      updateSparkline();
+      initEnergyChart();
+      initTendancesChart();
+
+      
+
+      // Check backend status
+
+      await checkBackend();
+
+      
+
+      // Calculate initial static state from backend to populate UI
+
+      const r = await recalc().catch(() => { const r2 = calc(); updateUI(r2); updateMiniPsychro(r2); return r2; });
+
+      
+
+      // Pause animations until 'Start' is pressed
+
+      const svgEl = document.getElementById('flow-svg');
+
+      if (svgEl && svgEl.pauseAnimations) svgEl.pauseAnimations();
+
+      
+
+      // Periodic backend health check
+
+      setInterval(checkBackend, 30000);
+
+      
+
+      // Init dashboard on click
+
+      const dashBtn = document.querySelector('.ni[data-view="dashboard"]');
+
+      if (dashBtn) dashBtn.addEventListener('click', initDashboard);
+
+      
+
+      const psyBtn = document.querySelector('.ni[data-view="psychro"]');
+
+      if (psyBtn) psyBtn.addEventListener('click', () => setTimeout(() => { initPsyInteraction(); drawPsychroChart(); }, 60));
+
+    });
+
+  
+    // Resize observer for Chart.js canvases
+    const chartResizeObserver = new ResizeObserver(entries => {
+      entries.forEach(e => {
+        const canvases = e.target.querySelectorAll('canvas');
+        canvases.forEach(c => {
+          const chart = Chart.getChart(c);
+          if (chart) chart.resize();
+        });
+      });
+    });
+    document.querySelectorAll('.view').forEach(v => chartResizeObserver.observe(v));
+
+  </script>
+
+</body>
+
+</html>
