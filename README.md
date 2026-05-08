@@ -2,6 +2,8 @@
 
 <div align="center">
   <h3>Advanced Air Handling Unit (AHU) Simulation & Environmental GIS Platform</h3>
+  <br>
+  <img src="simulator.png" alt="CTA-Sim PRO Simulator Dashboard" width="100%">
 </div>
 
 ## 📌 Overview
