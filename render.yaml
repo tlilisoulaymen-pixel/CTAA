@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: cta-sim-backend
+    env: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+
+  - type: web
+    name: cta-env-advisor
+    env: python
+    buildCommand: pip install -r environemental_advisor_agent.py/requirements.txt
+    startCommand: gunicorn --chdir environemental_advisor_agent.py api:app -b 0.0.0.0:$PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
